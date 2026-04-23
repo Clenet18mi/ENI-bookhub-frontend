@@ -1,0 +1,98 @@
+<section class="dashboard">
+  <header class="dashboard-hero">
+    <div>
+      <p class="eyebrow">Tableau de bord lecteur</p>
+      <h1>Bonjour, Marie.</h1>
+      <p class="lead">
+        Suivez vos emprunts, vos réservations et vos alertes dans une vue claire, rapide et responsive.
+      </p>
+    </div>
+
+    <div class="hero-actions">
+      <button mat-flat-button color="primary">
+        <mat-icon>search</mat-icon>
+        Explorer le catalogue
+      </button>
+      <button mat-stroked-button>
+        <mat-icon>calendar_month</mat-icon>
+        Voir mes échéances
+      </button>
+    </div>
+  </header>
+
+  <section class="stats-grid" aria-label="Indicateurs principaux">
+    @for (stat of stats; track stat.label) {
+      <mat-card class="stat-card" [class]="'tone-' + stat.tone">
+        <div class="stat-icon"><mat-icon>{{ stat.icon }}</mat-icon></div>
+        <div>
+          <p>{{ stat.label }}</p>
+          <strong>{{ stat.value }}</strong>
+          <span>{{ stat.hint }}</span>
+        </div>
+      </mat-card>
+    }
+  </section>
+
+  <section class="content-grid">
+    <mat-card class="panel panel-wide">
+      <div class="panel-head">
+        <div>
+          <p class="section-title">Mes emprunts récents</p>
+          <span class="section-subtitle">Vision rapide des retours à venir</span>
+        </div>
+        <a mat-button color="primary" routerLink="/loans">Voir tout</a>
+      </div>
+
+      <div class="loan-list">
+        @for (loan of recentLoans; track loan.title) {
+          <article class="loan-item">
+            <div class="book-cover" aria-hidden="true">
+              <mat-icon>auto_stories</mat-icon>
+            </div>
+
+            <div class="loan-copy">
+              <h3>{{ loan.title }}</h3>
+              <p>{{ loan.author }}</p>
+              <div class="loan-meta">
+                <span>Retour prévu : {{ loan.due }}</span>
+                <span [class.late]="loan.statusTone === 'late'">{{ loan.status }}</span>
+              </div>
+            </div>
+          </article>
+          @if (!$last) {
+            <mat-divider></mat-divider>
+          }
+        }
+      </div>
+    </mat-card>
+
+    <mat-card class="panel">
+      <div class="panel-head">
+        <div>
+          <p class="section-title">Réservations actives</p>
+          <span class="section-subtitle">Votre file d'attente en temps réel</span>
+        </div>
+      </div>
+
+      <div class="reservation-list">
+        @for (reservation of reservations; track reservation.title) {
+          <article class="reservation-item">
+            <div>
+              <h3>{{ reservation.title }}</h3>
+              <p>{{ reservation.author }}</p>
+            </div>
+
+            <div class="reservation-footer">
+              <strong>{{ reservation.availability }}</strong>
+              <div class="chip-row">
+                @for (chip of reservation.chips; track chip) {
+                  <mat-chip>{{ chip }}</mat-chip>
+                }
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+    </mat-card>
+  </section>
+</section>

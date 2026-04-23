@@ -1,0 +1,127 @@
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.shell {
+  min-height: 100vh;
+  background: var(--bh-paper);
+}
+
+.shell-sidenav {
+  width: 288px;
+  padding: 1.25rem;
+  border-right: 1px solid rgba(26, 26, 26, 0.08);
+  background: linear-gradient(180deg, #ffffff 0%, #faf7f1 100%);
+}
+
+.sidenav-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+  font-size: 1.25rem;
+}
+
+.sidenav-brand span,
+.brand span {
+  color: var(--bh-amber);
+}
+
+.sidenav-mark {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.9rem;
+  display: grid;
+  place-items: center;
+  background: var(--bh-forest);
+  color: #fff;
+  font-family: 'DM Serif Display', Georgia, serif;
+}
+
+.sidenav-brand small {
+  display: block;
+  color: var(--bh-ink-light);
+  font-weight: 400;
+  font-size: 0.82rem;
+}
+
+.sidenav-nav,
+.sidenav-nav {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.sidenav-nav a {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  text-decoration: none;
+  border-radius: 999px;
+  padding: 0.85rem 1rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.sidenav-nav a span {
+  white-space: nowrap;
+}
+
+.sidenav-nav a {
+  color: var(--bh-ink-mid);
+}
+
+.sidenav-nav a.active,
+.sidenav-nav a:hover,
+.sidenav-nav a:focus-visible {
+  background: var(--bh-forest-pale);
+  color: var(--bh-forest);
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0 1rem;
+  background: rgba(250, 248, 244, 0.88);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(26, 26, 26, 0.08);
+}
+
+.brand {
+  text-decoration: none;
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 1.5rem;
+  color: var(--bh-ink);
+}
+
+.menu-btn {
+  display: none;
+}
+
+.topbar-spacer {
+  flex: 1;
+}
+
+.session-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.shell-content {
+  padding: clamp(1rem, 2.4vw, 2rem);
+}
+
+@media (max-width: 960px) {
+  .menu-btn {
+    display: inline-flex;
+  }
+
+  .shell-content {
+    padding: 1rem;
+  }
+}
