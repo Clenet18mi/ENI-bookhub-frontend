@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -7,6 +7,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login-page',
@@ -26,6 +27,7 @@ import { MatInputModule } from '@angular/material/input';
 })
 export class LoginPageComponent {
   private readonly fb = new FormBuilder();
+  private readonly router = inject(Router);
 
   readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -40,6 +42,7 @@ export class LoginPageComponent {
     }
 
     console.info('Login mock submit', this.form.getRawValue());
+    void this.router.navigateByUrl('/dashboard');
   }
 
   hasError(controlName: 'email' | 'password'): boolean {
