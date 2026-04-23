@@ -1,15 +1,41 @@
+<<<<<<< HEAD
+import { Component } from '@angular/core';
+=======
 import { Component, inject } from '@angular/core';
+>>>>>>> origin/main
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+<<<<<<< HEAD
+=======
 import { ReactiveFormsModule } from '@angular/forms';
 import { ProfileService } from './profile.service';
+>>>>>>> origin/main
 
 @Component({
   selector: 'app-profile',
   standalone: true,
+<<<<<<< HEAD
+  imports: [MatButtonModule, MatCardModule, MatFormFieldModule, MatIconModule, MatInputModule],
+  template: `
+    <section class="profile-page">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">Profil</p>
+          <h1>Vos informations personnelles</h1>
+          <p class="lead">Gérez vos coordonnées et vos préférences dans un espace clair et responsive.</p>
+        </div>
+      </header>
+
+      <div class="grid">
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Coordonnées</mat-card-title>
+            <mat-card-subtitle>Mettez à jour votre compte</mat-card-subtitle>
+          </mat-card-header>
+=======
   imports: [MatButtonModule, MatCardModule, MatFormFieldModule, MatIconModule, MatInputModule, ReactiveFormsModule],
   template: `
     <section class="profile-page">
@@ -36,21 +62,31 @@ import { ProfileService } from './profile.service';
             <mat-card-subtitle>Mettez à jour vos informations de contact</mat-card-subtitle>
           </mat-card-header>
 
+>>>>>>> origin/main
           <mat-card-content class="form-grid">
             <mat-form-field appearance="outline">
               <mat-label>Prénom</mat-label>
               <input matInput value="Marie" />
             </mat-form-field>
+<<<<<<< HEAD
+=======
 
+>>>>>>> origin/main
             <mat-form-field appearance="outline">
               <mat-label>Nom</mat-label>
               <input matInput value="Dupont" />
             </mat-form-field>
+<<<<<<< HEAD
+=======
 
+>>>>>>> origin/main
             <mat-form-field appearance="outline" class="full">
               <mat-label>Email</mat-label>
               <input matInput value="marie.dupont@bookhub.fr" />
             </mat-form-field>
+<<<<<<< HEAD
+          </mat-card-content>
+=======
 
             <mat-form-field appearance="outline" class="full">
               <mat-label>Téléphone</mat-label>
@@ -58,22 +94,32 @@ import { ProfileService } from './profile.service';
             </mat-form-field>
           </mat-card-content>
 
+>>>>>>> origin/main
           <mat-card-actions>
             <button mat-flat-button color="primary"><mat-icon>save</mat-icon> Enregistrer</button>
           </mat-card-actions>
         </mat-card>
 
+<<<<<<< HEAD
+        <div class="stack">
+=======
         <div class="side-stack">
+>>>>>>> origin/main
           <mat-card>
             <mat-card-header>
               <mat-card-title>Sécurité</mat-card-title>
             </mat-card-header>
             <mat-card-content>
+<<<<<<< HEAD
+              <p>Modifiez votre mot de passe quand nécessaire.</p>
+              <button mat-stroked-button><mat-icon>lock_reset</mat-icon> Changer le mot de passe</button>
+=======
               <p>Ouvrez un panneau pour changer le mot de passe.</p>
               <button mat-stroked-button (click)="openPasswordDialog()">
                 <mat-icon>lock_reset</mat-icon>
                 Changer le mot de passe
               </button>
+>>>>>>> origin/main
             </mat-card-content>
           </mat-card>
 
@@ -82,11 +128,16 @@ import { ProfileService } from './profile.service';
               <mat-card-title>RGPD</mat-card-title>
             </mat-card-header>
             <mat-card-content>
+<<<<<<< HEAD
+              <p>Vous pouvez supprimer votre compte à tout moment.</p>
+              <button mat-button color="warn"><mat-icon>person_remove</mat-icon> Supprimer mon compte</button>
+=======
               <p>Gérez vos données et la suppression du compte.</p>
               <button mat-button color="warn" (click)="openDeleteDialog()">
                 <mat-icon>person_remove</mat-icon>
                 Supprimer mon compte
               </button>
+>>>>>>> origin/main
             </mat-card-content>
           </mat-card>
         </div>
@@ -97,6 +148,12 @@ import { ProfileService } from './profile.service';
     `
       .profile-page {
         display: grid;
+<<<<<<< HEAD
+        gap: 1.25rem;
+      }
+
+      .hero {
+=======
         gap: 1.5rem;
       }
 
@@ -105,6 +162,7 @@ import { ProfileService } from './profile.service';
         justify-content: space-between;
         align-items: center;
         gap: 1rem;
+>>>>>>> origin/main
         padding: 1.5rem;
         border-radius: var(--bh-radius-lg);
         background: linear-gradient(135deg, rgba(31, 77, 58, 0.1), rgba(184, 92, 0, 0.08)), #fff;
@@ -126,6 +184,16 @@ import { ProfileService } from './profile.service';
       }
 
       .lead,
+<<<<<<< HEAD
+      mat-card-content p,
+      mat-card-subtitle {
+        color: var(--bh-ink-mid);
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 1.3fr 0.7fr;
+=======
       .quick-card p,
       .main-card mat-card-subtitle,
       .side-stack p {
@@ -157,15 +225,19 @@ import { ProfileService } from './profile.service';
       .profile-grid {
         display: grid;
         grid-template-columns: 1.35fr 0.65fr;
+>>>>>>> origin/main
         gap: 1rem;
         align-items: start;
       }
 
+<<<<<<< HEAD
+=======
       .main-card,
       .side-stack mat-card {
         border-radius: var(--bh-radius-md);
       }
 
+>>>>>>> origin/main
       .form-grid {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -176,15 +248,22 @@ import { ProfileService } from './profile.service';
         grid-column: 1 / -1;
       }
 
+<<<<<<< HEAD
+      .stack {
+=======
       .side-stack {
+>>>>>>> origin/main
         display: grid;
         gap: 1rem;
       }
 
+<<<<<<< HEAD
+=======
       .side-stack button {
         margin-top: 0.75rem;
       }
 
+>>>>>>> origin/main
       mat-card-actions,
       mat-card-content {
         padding: 1rem;
@@ -196,17 +275,24 @@ import { ProfileService } from './profile.service';
       }
 
       @media (max-width: 960px) {
+<<<<<<< HEAD
+        .grid,
+=======
         .profile-hero,
         .profile-grid,
+>>>>>>> origin/main
         .form-grid {
           grid-template-columns: 1fr;
         }
 
+<<<<<<< HEAD
+=======
         .profile-hero {
           display: grid;
           justify-content: initial;
         }
 
+>>>>>>> origin/main
         .full {
           grid-column: auto;
         }
@@ -214,6 +300,9 @@ import { ProfileService } from './profile.service';
     `,
   ],
 })
+<<<<<<< HEAD
+export class ProfileComponent {}
+=======
 export class ProfileComponent {
   private readonly profileService = inject(ProfileService);
 
@@ -225,3 +314,4 @@ export class ProfileComponent {
     this.profileService.openDeleteDialog();
   }
 }
+>>>>>>> origin/main

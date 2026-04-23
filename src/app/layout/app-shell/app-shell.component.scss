@@ -73,13 +73,11 @@
 .topbar {
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 5;
   display: flex;
-  align-items: center;
   gap: 1rem;
-  padding: 0 1rem;
-  background: rgba(250, 248, 244, 0.88);
-  backdrop-filter: blur(12px);
+  background: rgba(250, 248, 244, 0.94);
+  backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(26, 26, 26, 0.08);
 }
 
@@ -90,12 +88,16 @@
   color: var(--bh-ink);
 }
 
-.menu-btn {
-  display: none;
+.brand span {
+  color: var(--bh-amber);
 }
 
 .topbar-spacer {
   flex: 1;
+}
+
+.menu-btn {
+  display: none;
 }
 
 .session-actions {

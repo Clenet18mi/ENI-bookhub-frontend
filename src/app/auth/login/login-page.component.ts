@@ -43,13 +43,6 @@ export class LoginPageComponent {
     }
 
     console.info('Login mock submit', this.form.getRawValue());
-    this.authService.setDevSession();
-    void this.router.navigateByUrl('/dashboard');
-  }
-
-  skipLogin(): void {
-    this.authService.setDevSession();
-    void this.router.navigateByUrl('/dashboard');
   }
 
   hasError(controlName: 'email' | 'password'): boolean {
