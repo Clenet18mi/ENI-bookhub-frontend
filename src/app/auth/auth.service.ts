@@ -32,7 +32,11 @@ export interface AuthSession {
   providedIn: 'root',
 })
 export class AuthService {
+<<<<<<< HEAD
   private readonly sessionKey = 'bookhub_session';
+=======
+  private readonly tokenKey = 'bookhub_token';
+>>>>>>> origin/main
   private readonly http = inject(HttpClient);
   private readonly baseUrl = '/api/auth';
 
@@ -89,5 +93,17 @@ export class AuthService {
 
   clearSession(): void {
     localStorage.removeItem(this.sessionKey);
+  }
+
+  setDevSession(): void {
+    localStorage.setItem(this.tokenKey, 'dev-token');
+  }
+
+  clearSession(): void {
+    localStorage.removeItem(this.tokenKey);
+  }
+
+  hasSession(): boolean {
+    return Boolean(localStorage.getItem(this.tokenKey));
   }
 }

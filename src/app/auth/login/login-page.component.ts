@@ -42,20 +42,7 @@ export class LoginPageComponent {
       return;
     }
 
-    this.authService.resetClientState();
-    const session = this.authService.createDevSession(this.form.getRawValue());
-    this.authService.saveSession(session);
-    void this.router.navigateByUrl('/dashboard');
-  }
-
-  skipLogin(): void {
-    this.authService.resetClientState();
-    const session = this.authService.createDevSession({
-      email: 'dev@bookhub.local',
-      password: 'dev-password',
-    });
-    this.authService.saveSession(session);
-    void this.router.navigateByUrl('/dashboard');
+    console.info('Login mock submit', this.form.getRawValue());
   }
 
   hasError(controlName: 'email' | 'password'): boolean {
