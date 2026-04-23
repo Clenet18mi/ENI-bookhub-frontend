@@ -1,0 +1,49 @@
+<mat-sidenav-container class="shell">
+  <mat-sidenav
+    class="shell-sidenav"
+    [mode]="(isHandset$ | async) ? 'over' : 'side'"
+    [opened]="(isHandset$ | async) ? navOpen() : true"
+    (closedStart)="closeNav()"
+  >
+    <div class="sidenav-brand">
+      <span class="sidenav-mark">B</span>
+      <div>
+        <div>Book<span>Hub</span></div>
+        <small>Bibliothèque communautaire</small>
+      </div>
+    </div>
+
+    <nav class="sidenav-nav">
+      @for (item of mainNav; track item.link) {
+        <a [routerLink]="item.link" routerLinkActive="active" (click)="closeNav()">
+          <mat-icon>{{ item.icon }}</mat-icon>
+          <span>{{ item.label }}</span>
+        </a>
+      }
+    </nav>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <mat-toolbar class="topbar">
+      <button mat-icon-button type="button" class="menu-btn" (click)="toggleNav()" aria-label="Ouvrir le menu">
+        <mat-icon>menu</mat-icon>
+      </button>
+      <a routerLink="/dashboard" class="brand">Book<span>Hub</span></a>
+
+      <div class="topbar-spacer"></div>
+
+      <div class="session-actions">
+        <a mat-icon-button routerLink="/profile" aria-label="Accéder au profil">
+          <mat-icon>person</mat-icon>
+        </a>
+        <a mat-icon-button routerLink="/login" aria-label="Se déconnecter">
+          <mat-icon>logout</mat-icon>
+        </a>
+      </div>
+    </mat-toolbar>
+
+    <main class="shell-content">
+      <router-outlet />
+    </main>
+  </mat-sidenav-content>
+</mat-sidenav-container>
