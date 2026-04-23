@@ -12,10 +12,10 @@ import { MatIconModule } from '@angular/material/icon';
       <mat-card>
         <mat-card-header>
           <mat-card-title>Catalogue</mat-card-title>
-          <mat-card-subtitle>Base responsive prête pour la recherche et les filtres.</mat-card-subtitle>
+          <mat-card-subtitle>Interface responsive pour rechercher et filtrer les livres.</mat-card-subtitle>
         </mat-card-header>
         <mat-card-content>
-          <p>Cette vue servira de grille livres, filtres, tri et pagination.</p>
+          <p>Cette page servira de grille de livres, filtres et pagination.</p>
         </mat-card-content>
         <mat-card-actions>
           <button mat-flat-button color="primary"><mat-icon>search</mat-icon> Rechercher</button>

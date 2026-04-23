@@ -18,6 +18,7 @@ export interface RegisterRequest {
   providedIn: 'root',
 })
 export class AuthService {
+  private readonly tokenKey = 'bookhub_token';
   private readonly http = inject(HttpClient);
   private readonly baseUrl = '/api/auth';
 
@@ -27,5 +28,17 @@ export class AuthService {
 
   register(payload: RegisterRequest): Observable<unknown> {
     return this.http.post(`${this.baseUrl}/register`, payload);
+  }
+
+  setDevSession(): void {
+    localStorage.setItem(this.tokenKey, 'dev-token');
+  }
+
+  clearSession(): void {
+    localStorage.removeItem(this.tokenKey);
+  }
+
+  hasSession(): boolean {
+    return Boolean(localStorage.getItem(this.tokenKey));
   }
 }

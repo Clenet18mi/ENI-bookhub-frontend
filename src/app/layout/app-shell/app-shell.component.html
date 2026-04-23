@@ -12,6 +12,7 @@
         <small>Bibliothèque communautaire</small>
       </div>
     </div>
+
     <nav class="sidenav-nav">
       @for (item of mainNav; track item.link) {
         <a [routerLink]="item.link" routerLinkActive="active" (click)="closeNav()">

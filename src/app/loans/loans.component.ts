@@ -12,10 +12,10 @@ import { MatIconModule } from '@angular/material/icon';
       <mat-card>
         <mat-card-header>
           <mat-card-title>Mes emprunts</mat-card-title>
-          <mat-card-subtitle>Historique, retours et alertes de retard.</mat-card-subtitle>
+          <mat-card-subtitle>Suivi des emprunts en cours et de l'historique.</mat-card-subtitle>
         </mat-card-header>
         <mat-card-content>
-          <p>Cette vue accueillera les onglets emprunts en cours et historique.</p>
+          <p>Cette page accueillera les empois en cours, le retour et les alertes.</p>
         </mat-card-content>
         <mat-card-actions>
           <button mat-flat-button color="primary"><mat-icon>history</mat-icon> Voir l'historique</button>

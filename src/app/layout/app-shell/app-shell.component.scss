@@ -47,7 +47,6 @@
   font-size: 0.82rem;
 }
 
-.sidenav-nav,
 .sidenav-nav {
   display: grid;
   gap: 0.5rem;
@@ -61,13 +60,6 @@
   border-radius: 999px;
   padding: 0.85rem 1rem;
   transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-.sidenav-nav a span {
-  white-space: nowrap;
-}
-
-.sidenav-nav a {
   color: var(--bh-ink-mid);
 }
 

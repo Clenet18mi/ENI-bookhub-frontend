@@ -132,6 +132,11 @@ p {
   font-weight: 600;
 }
 
+.dev-skip {
+  justify-self: center;
+  color: var(--bh-forest-mid);
+}
+
 .auth-link {
   color: var(--bh-forest-mid);
   text-decoration: none;

@@ -23,9 +23,7 @@ export type DashboardReservation = {
   chips: string[];
 };
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class DashboardService {
   getStats(): DashboardStat[] {
     return [
@@ -45,18 +43,8 @@ export class DashboardService {
 
   getReservations(): DashboardReservation[] {
     return [
-      {
-        title: 'La Ville invisible',
-        author: 'S. Cohen',
-        availability: 'Disponible sous 3 jours',
-        chips: ['Position 1', 'Réservation active'],
-      },
-      {
-        title: 'Atlas des histoires',
-        author: 'J. Lefevre',
-        availability: 'Disponible sous 6 jours',
-        chips: ['Position 2', 'En attente'],
-      },
+      { title: 'La Ville invisible', author: 'S. Cohen', availability: 'Disponible sous 3 jours', chips: ['Position 1', 'Réservation active'] },
+      { title: 'Atlas des histoires', author: 'J. Lefevre', availability: 'Disponible sous 6 jours', chips: ['Position 2', 'En attente'] },
     ];
   }
 }
