@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -26,6 +26,7 @@ import { MatInputModule } from '@angular/material/input';
 })
 export class LoginPageComponent {
   private readonly fb = new FormBuilder();
+  private readonly router = inject(Router);
 
   readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -40,6 +41,7 @@ export class LoginPageComponent {
     }
 
     console.info('Login mock submit', this.form.getRawValue());
+    void this.router.navigateByUrl('/catalogue');
   }
 
   hasError(controlName: 'email' | 'password'): boolean {

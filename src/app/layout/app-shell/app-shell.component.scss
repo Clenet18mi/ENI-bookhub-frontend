@@ -1,0 +1,39 @@
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.shell {
+  min-height: 100vh;
+  background: var(--bh-paper);
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  gap: 1rem;
+  background: rgba(250, 248, 244, 0.94);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(26, 26, 26, 0.08);
+}
+
+.brand {
+  text-decoration: none;
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 1.5rem;
+  color: var(--bh-ink);
+}
+
+.brand span {
+  color: var(--bh-amber);
+}
+
+.topbar-spacer {
+  flex: 1;
+}
+
+.shell-content {
+  padding: clamp(1rem, 2.4vw, 2rem);
+}

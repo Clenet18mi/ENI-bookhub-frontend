@@ -3,8 +3,18 @@ import { Routes } from '@angular/router';
 export const routes: Routes = [
   {
     path: '',
-    pathMatch: 'full',
-    redirectTo: 'login',
+    loadComponent: () => import('./layout/app-shell/app-shell.component').then((m) => m.AppShellComponent),
+    children: [
+      {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: 'catalogue',
+      },
+      {
+        path: 'catalogue',
+        loadComponent: () => import('./catalogue/catalogue.component').then((m) => m.CatalogueComponent),
+      },
+    ],
   },
   {
     path: 'login',
@@ -16,6 +26,6 @@ export const routes: Routes = [
   },
   {
     path: '**',
-    redirectTo: 'login',
+    redirectTo: '',
   },
 ];
