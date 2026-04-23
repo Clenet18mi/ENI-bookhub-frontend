@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -27,6 +27,9 @@ import { AuthService } from '../auth.service';
 })
 export class LoginPageComponent {
   private readonly fb = new FormBuilder();
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -41,7 +44,8 @@ export class LoginPageComponent {
     }
 
     this.authService.login(this.form.getRawValue());
-    this.router.navigateByUrl(this.route.snapshot.queryParamMap.get('returnUrl') ?? '/dashboard');
+    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/dashboard';
+    this.router.navigateByUrl(returnUrl);
   }
 
   devLogin(): void {
