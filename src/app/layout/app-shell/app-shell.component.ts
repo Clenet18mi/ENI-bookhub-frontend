@@ -51,13 +51,13 @@ interface ShellNavItem {
 
           <span class="spacer"></span>
 
-          <div class="profile-chip">
+          <a class="profile-chip" routerLink="/profile" aria-label="Ouvrir mon profil">
             <div class="avatar">{{ userInitials }}</div>
             <div class="profile-meta">
               <strong>{{ userLabel }}</strong>
               <span>{{ userEmail }}</span>
             </div>
-          </div>
+          </a>
 
           <button mat-stroked-button type="button" class="logout-button" (click)="logout()">
             <mat-icon>logout</mat-icon>
@@ -83,7 +83,10 @@ interface ShellNavItem {
       .brand-name span { color: var(--bh-amber); }
       .brand-tag { color: var(--bh-ink-light); font-size: .92rem; }
       .nav-list { display: grid; gap: .35rem; }
-      .nav-list a { border-radius: 14px; margin: 0 .15rem; }
+      .nav-list a { border-radius: 14px; margin: 0 .15rem; text-decoration: none; }
+      .nav-list a:hover,
+      .nav-list a:visited,
+      .nav-list a:active { text-decoration: none; }
       .nav-list a.active { background: var(--bh-forest-pale); color: var(--bh-forest); }
       .content-shell { min-height: 100vh; }
       .topbar { position: sticky; top: 0; z-index: 5; gap: 1rem; background: rgba(255,255,255,.78); backdrop-filter: blur(14px); border-bottom: 1px solid rgba(26,26,26,.08); }
@@ -92,14 +95,15 @@ interface ShellNavItem {
       .topbar-copy p { font-family: 'DM Serif Display', Georgia, serif; font-size: 1.2rem; }
       .topbar-copy span, .profile-meta span { color: var(--bh-ink-light); font-size: .92rem; }
       .spacer { flex: 1; }
-      .profile-chip { display: inline-flex; align-items: center; gap: .75rem; padding: .45rem .7rem; border-radius: 999px; background: rgba(31,77,58,.06); }
+      .profile-chip { display: inline-flex; align-items: center; gap: .75rem; padding: .45rem .7rem; border-radius: 999px; background: rgba(31,77,58,.06); text-decoration: none; color: inherit; }
+      .profile-chip:hover { background: rgba(31,77,58,.1); }
       .avatar { background: var(--bh-forest); color: #fff; font-size: .95rem; }
       .profile-meta { display: grid; }
       .profile-meta strong { font-size: .95rem; }
       .logout-button { border-radius: 999px; }
       .main-content { padding: 1.25rem; }
-      @media (max-width: 960px) { .sidenav { width: min(86vw, 300px); } .profile-chip { display: none; } }
-      @media (max-width: 640px) { .topbar { padding-inline: .5rem; } .topbar-copy span, .logout-button span { display: none; } .main-content { padding: .85rem; } }
+      @media (max-width: 960px) { .sidenav { width: min(86vw, 300px); } }
+      @media (max-width: 640px) { .topbar { padding-inline: .5rem; } .topbar-copy span, .logout-button span, .profile-meta span { display: none; } .main-content { padding: .85rem; } }
     `,
   ],
 })
@@ -110,7 +114,7 @@ export class AppShellComponent {
   readonly navItems: ShellNavItem[] = [
     { label: 'Tableau de bord', icon: 'space_dashboard', link: '/dashboard' },
     { label: 'Catalogue', icon: 'local_library', link: '/catalogue' },
-    { label: 'Profil', icon: 'person', link: '/profile' },
+    { label: 'Mes emprunts', icon: 'calendar_month', link: '/loans' },
   ];
 
   protected isMobile = typeof window !== 'undefined' ? window.innerWidth < 960 : false;

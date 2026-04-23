@@ -1,92 +1,216 @@
 import { Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-import { MatDividerModule } from '@angular/material/divider';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { ReactiveFormsModule } from '@angular/forms';
 import { ProfileService } from './profile.service';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [MatButtonModule, MatCardModule, MatDividerModule, MatIconModule],
+  imports: [MatButtonModule, MatCardModule, MatFormFieldModule, MatIconModule, MatInputModule, ReactiveFormsModule],
   template: `
     <section class="profile-page">
       <header class="profile-hero">
         <div>
-          <p class="eyebrow">Mon compte</p>
-          <h1>Votre profil BookHub.</h1>
-          <p>Retrouvez vos informations, votre sécurité et vos paramètres de confidentialité au même endroit.</p>
+          <p class="eyebrow">Mon profil</p>
+          <h1>Vos informations et votre compte</h1>
+          <p class="lead">Modifiez vos coordonnées, votre mot de passe et vos paramètres RGPD.</p>
         </div>
-        <button mat-flat-button color="primary" type="button"><mat-icon>edit</mat-icon> Modifier le profil</button>
+
+        <div class="quick-card">
+          <div class="avatar">M</div>
+          <div>
+            <strong>Marie Dupont</strong>
+            <p>Lecteur</p>
+          </div>
+        </div>
       </header>
 
-      <section class="profile-grid">
-        <mat-card class="profile-card">
-          <div class="card-head">
-            <mat-icon>badge</mat-icon>
-            <h2>Informations</h2>
-          </div>
-          <div class="info-list">
-            <div><span>Prénom</span><strong>Demo</strong></div>
-            <div><span>Nom</span><strong>Lecteur</strong></div>
-            <div><span>Email</span><strong>dev@bookhub.local</strong></div>
-          </div>
+      <div class="profile-grid">
+        <mat-card class="main-card">
+          <mat-card-header>
+            <mat-card-title>Coordonnées</mat-card-title>
+            <mat-card-subtitle>Mettez à jour vos informations de contact</mat-card-subtitle>
+          </mat-card-header>
+
+          <mat-card-content class="form-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>Prénom</mat-label>
+              <input matInput value="Marie" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Nom</mat-label>
+              <input matInput value="Dupont" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full">
+              <mat-label>Email</mat-label>
+              <input matInput value="marie.dupont@bookhub.fr" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full">
+              <mat-label>Téléphone</mat-label>
+              <input matInput value="06 12 34 56 78" />
+            </mat-form-field>
+          </mat-card-content>
+
+          <mat-card-actions>
+            <button mat-flat-button color="primary"><mat-icon>save</mat-icon> Enregistrer</button>
+          </mat-card-actions>
         </mat-card>
 
-        <mat-card class="profile-card">
-          <div class="card-head">
-            <mat-icon>lock</mat-icon>
-            <h2>Sécurité</h2>
-          </div>
-          <p>Gérez ici les informations liées à l'accès au compte et aux préférences de connexion.</p>
-          <div class="action-list">
-            <button mat-stroked-button type="button" (click)="openPasswordDialog()">Changer le mot de passe</button>
-            <button mat-stroked-button type="button" (click)="openDeleteDialog()">Déconnexion sur tous les appareils</button>
-          </div>
-        </mat-card>
+        <div class="side-stack">
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title>Sécurité</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <p>Ouvrez un panneau pour changer le mot de passe.</p>
+              <button mat-stroked-button (click)="openPasswordDialog()">
+                <mat-icon>lock_reset</mat-icon>
+                Changer le mot de passe
+              </button>
+            </mat-card-content>
+          </mat-card>
 
-        <mat-card class="profile-card profile-card-wide">
-          <div class="card-head">
-            <mat-icon>shield</mat-icon>
-            <h2>Confidentialité</h2>
-          </div>
-          <p>Les réglages RGPD et la suppression de données seront détaillés ici dans la suite du parcours.</p>
-          <mat-divider></mat-divider>
-          <div class="privacy-grid">
-            <div>
-              <strong>Consentements</strong>
-              <span>Historique des choix utilisateur</span>
-            </div>
-            <div>
-              <strong>Données personnelles</strong>
-              <span>Export et gestion des informations</span>
-            </div>
-          </div>
-        </mat-card>
-      </section>
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title>RGPD</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <p>Gérez vos données et la suppression du compte.</p>
+              <button mat-button color="warn" (click)="openDeleteDialog()">
+                <mat-icon>person_remove</mat-icon>
+                Supprimer mon compte
+              </button>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
     </section>
   `,
   styles: [
     `
-      :host { display: block; }
-      .profile-page { display: grid; gap: 1rem; }
-      .profile-hero { display: flex; justify-content: space-between; gap: 1rem; align-items: end; padding: 1.5rem; border-radius: 24px; background: linear-gradient(135deg, rgba(184,92,0,.1), rgba(31,77,58,.08)), #fff; border: 1px solid rgba(26,26,26,.06); }
-      .eyebrow { margin: 0 0 .35rem; text-transform: uppercase; letter-spacing: .12em; font-size: .78rem; color: var(--bh-forest-mid); }
-      h1 { margin: 0; font-family: 'DM Serif Display', Georgia, serif; font-size: clamp(2rem, 4vw, 3.2rem); }
-      .profile-hero p { margin: .5rem 0 0; color: var(--bh-ink-mid); max-width: 58ch; line-height: 1.6; }
-      .profile-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
-      .profile-card { padding: 1.25rem; border-radius: 24px; display: grid; gap: .9rem; }
-      .profile-card-wide { grid-column: 1 / -1; }
-      .card-head { display: flex; align-items: center; gap: .75rem; }
-      .card-head h2 { margin: 0; font-family: 'DM Serif Display', Georgia, serif; }
-      .card-head mat-icon { color: var(--bh-forest); }
-      .info-list { display: grid; gap: .75rem; }
-      .info-list div, .privacy-grid div { display: grid; gap: .1rem; padding: .85rem 1rem; border-radius: 16px; background: rgba(31,77,58,.05); }
-      .info-list span, .privacy-grid span, .profile-card p { color: var(--bh-ink-mid); }
-      .action-list { display: flex; flex-wrap: wrap; gap: .75rem; }
-      .privacy-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; }
-      @media (max-width: 960px) { .profile-hero, .profile-grid { display: grid; } }
-      @media (max-width: 640px) { .profile-hero { padding: 1rem; } .profile-grid, .privacy-grid { grid-template-columns: 1fr; } .profile-card { padding: 1rem; } }
+      .profile-page {
+        display: grid;
+        gap: 1.5rem;
+      }
+
+      .profile-hero {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        align-items: center;
+        padding: 1.5rem;
+        border-radius: var(--bh-radius-lg);
+        background: linear-gradient(135deg, rgba(31, 77, 58, 0.1), rgba(184, 92, 0, 0.08)), #fff;
+        border: 1px solid rgba(26, 26, 26, 0.06);
+      }
+
+      .eyebrow {
+        margin: 0 0 0.35rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 0.78rem;
+        color: var(--bh-forest-mid);
+      }
+
+      h1 {
+        margin: 0;
+        font-family: 'DM Serif Display', Georgia, serif;
+        font-size: clamp(2rem, 4vw, 3.2rem);
+      }
+
+      .lead,
+      .quick-card p,
+      .main-card mat-card-subtitle,
+      .side-stack p {
+        margin: 0.75rem 0 0;
+        color: var(--bh-ink-mid);
+      }
+
+      .quick-card {
+        display: flex;
+        align-items: center;
+        gap: 0.9rem;
+        padding: 1rem 1.1rem;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.65);
+        border: 1px solid rgba(26, 26, 26, 0.08);
+      }
+
+      .avatar {
+        width: 3rem;
+        height: 3rem;
+        border-radius: 999px;
+        display: grid;
+        place-items: center;
+        background: var(--bh-forest);
+        color: #fff;
+        font-weight: 700;
+      }
+
+      .profile-grid {
+        display: grid;
+        grid-template-columns: 1.35fr 0.65fr;
+        gap: 1rem;
+        align-items: start;
+      }
+
+      .main-card,
+      .side-stack mat-card {
+        border-radius: var(--bh-radius-md);
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem;
+      }
+
+      .full {
+        grid-column: 1 / -1;
+      }
+
+      .side-stack {
+        display: grid;
+        gap: 1rem;
+      }
+
+      .side-stack button {
+        margin-top: 0.75rem;
+      }
+
+      mat-card-actions,
+      mat-card-content {
+        padding: 1rem;
+      }
+
+      mat-card-actions button mat-icon,
+      mat-card-content button mat-icon {
+        margin-right: 0.5rem;
+      }
+
+      @media (max-width: 960px) {
+        .profile-hero,
+        .profile-grid,
+        .form-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .profile-hero {
+          display: grid;
+          justify-content: initial;
+        }
+
+        .full {
+          grid-column: auto;
+        }
+      }
     `,
   ],
 })
