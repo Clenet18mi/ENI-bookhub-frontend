@@ -14,15 +14,19 @@ export const routes: Routes = [
         path: 'catalogue',
         loadComponent: () => import('./catalogue/catalogue.component').then((m) => m.CatalogueComponent),
       },
+      {
+        path: 'profile',
+        loadComponent: () => import('./profile/profile.component').then((m) => m.ProfileComponent),
+      },
+      {
+        path: 'register',
+        loadComponent: () => import('./auth/register/register-page.component').then((m) => m.RegisterPageComponent),
+      },
     ],
   },
   {
     path: 'login',
     loadComponent: () => import('./auth/login/login-page.component').then((m) => m.LoginPageComponent),
-  },
-  {
-    path: 'register',
-    loadComponent: () => import('./auth/register/register-page.component').then((m) => m.RegisterPageComponent),
   },
   {
     path: '**',
