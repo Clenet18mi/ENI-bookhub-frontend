@@ -7,6 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { AuthService } from '../../auth/auth.service';
 
 @Component({
   selector: 'app-shell',
@@ -17,6 +18,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 })
 export class AppShellComponent {
   private readonly breakpointObserver = inject(BreakpointObserver);
+  private readonly authService = inject(AuthService);
 
   readonly navOpen = signal(false);
   readonly isHandset$ = this.breakpointObserver.observe(Breakpoints.Handset).pipe(
@@ -25,8 +27,8 @@ export class AppShellComponent {
   );
 
   readonly mainNav = [
+    { label: 'Dashboard', icon: 'dashboard', link: '/dashboard' },
     { label: 'Catalogue', icon: 'menu_book', link: '/catalogue' },
-    { label: 'Profil', icon: 'person', link: '/profile' },
   ];
 
   toggleNav(): void {
@@ -35,5 +37,9 @@ export class AppShellComponent {
 
   closeNav(): void {
     this.navOpen.set(false);
+  }
+
+  logout(): void {
+    this.authService.clearSession();
   }
 }

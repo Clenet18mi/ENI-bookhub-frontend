@@ -7,6 +7,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { AuthService } from '../auth.service';
 
 @Component({
   selector: 'app-login-page',
@@ -27,6 +28,7 @@ import { MatInputModule } from '@angular/material/input';
 export class LoginPageComponent {
   private readonly fb = new FormBuilder();
   private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
 
   readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -40,8 +42,20 @@ export class LoginPageComponent {
       return;
     }
 
-    console.info('Login mock submit', this.form.getRawValue());
-    void this.router.navigateByUrl('/catalogue');
+    this.authService.resetClientState();
+    const session = this.authService.createDevSession(this.form.getRawValue());
+    this.authService.saveSession(session);
+    void this.router.navigateByUrl('/dashboard');
+  }
+
+  skipLogin(): void {
+    this.authService.resetClientState();
+    const session = this.authService.createDevSession({
+      email: 'dev@bookhub.local',
+      password: 'dev-password',
+    });
+    this.authService.saveSession(session);
+    void this.router.navigateByUrl('/dashboard');
   }
 
   hasError(controlName: 'email' | 'password'): boolean {
