@@ -1,0 +1,164 @@
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.shell {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f7f3ea 0%, #f3eee3 100%);
+}
+
+.sidenav {
+  width: 280px;
+  padding: 1.25rem;
+  background: rgba(255, 255, 255, 0.96);
+  border-right: 1px solid rgba(26, 26, 26, 0.08);
+}
+
+.brand-block {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.75rem 0.25rem 1.5rem;
+}
+
+.brand-mark,
+.avatar {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 1rem;
+  display: grid;
+  place-items: center;
+  font-family: 'DM Serif Display', Georgia, serif;
+}
+
+.brand-mark {
+  background: var(--bh-forest);
+  color: #fff;
+  font-size: 1.35rem;
+}
+
+.brand-name {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 1.55rem;
+  line-height: 1;
+}
+
+.brand-name span {
+  color: var(--bh-amber);
+}
+
+.brand-tag {
+  color: var(--bh-ink-light);
+  font-size: 0.92rem;
+}
+
+.nav-list {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.nav-list a {
+  border-radius: 14px;
+  margin: 0 0.15rem;
+}
+
+.nav-list a.active {
+  background: var(--bh-forest-pale);
+  color: var(--bh-forest);
+}
+
+.content-shell {
+  min-height: 100vh;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  gap: 1rem;
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(26, 26, 26, 0.08);
+}
+
+.topbar-copy {
+  display: grid;
+  gap: 0.1rem;
+}
+
+.topbar-copy p,
+.topbar-copy span {
+  margin: 0;
+}
+
+.topbar-copy p {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 1.2rem;
+}
+
+.topbar-copy span,
+.profile-meta span {
+  color: var(--bh-ink-light);
+  font-size: 0.92rem;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.profile-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.45rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(31, 77, 58, 0.06);
+}
+
+.avatar {
+  background: var(--bh-forest);
+  color: #fff;
+  font-size: 0.95rem;
+}
+
+.profile-meta {
+  display: grid;
+}
+
+.profile-meta strong {
+  font-size: 0.95rem;
+}
+
+.logout-button {
+  border-radius: 999px;
+}
+
+.main-content {
+  padding: 1.25rem;
+}
+
+@media (max-width: 960px) {
+  .sidenav {
+    width: min(86vw, 300px);
+  }
+
+  .profile-chip {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .topbar {
+    padding-inline: 0.5rem;
+  }
+
+  .topbar-copy span,
+  .logout-button span {
+    display: none;
+  }
+
+  .main-content {
+    padding: 0.85rem;
+  }
+}

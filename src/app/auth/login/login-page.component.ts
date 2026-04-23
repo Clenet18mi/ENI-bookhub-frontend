@@ -1,12 +1,13 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { AuthService } from '../auth.service';
 
 @Component({
   selector: 'app-login-page',
@@ -26,6 +27,9 @@ import { MatInputModule } from '@angular/material/input';
 })
 export class LoginPageComponent {
   private readonly fb = new FormBuilder();
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -39,7 +43,13 @@ export class LoginPageComponent {
       return;
     }
 
-    console.info('Login mock submit', this.form.getRawValue());
+    this.authService.login(this.form.getRawValue());
+    this.router.navigateByUrl(this.route.snapshot.queryParamMap.get('returnUrl') ?? '/dashboard');
+  }
+
+  devLogin(): void {
+    this.authService.createDevSession();
+    this.router.navigateByUrl('/dashboard');
   }
 
   hasError(controlName: 'email' | 'password'): boolean {

@@ -1,12 +1,13 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { AuthService } from '../auth.service';
 
 function matchPasswords(control: AbstractControl): ValidationErrors | null {
   const password = control.get('password')?.value;
@@ -33,6 +34,8 @@ function matchPasswords(control: AbstractControl): ValidationErrors | null {
 })
 export class RegisterPageComponent {
   private readonly fb = new FormBuilder();
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
 
   readonly form = this.fb.nonNullable.group(
     {
@@ -52,7 +55,8 @@ export class RegisterPageComponent {
       return;
     }
 
-    console.info('Register mock submit', this.form.getRawValue());
+    this.authService.register(this.form.getRawValue());
+    this.router.navigateByUrl('/dashboard');
   }
 
   hasError(controlName: 'firstName' | 'lastName' | 'email' | 'password' | 'confirmPassword' | 'acceptTerms'): boolean {

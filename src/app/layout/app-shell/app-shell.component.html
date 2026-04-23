@@ -1,0 +1,52 @@
+<mat-sidenav-container class="shell">
+  <mat-sidenav class="sidenav" [mode]="isMobile ? 'over' : 'side'" [opened]="drawerOpened">
+    <div class="brand-block">
+      <div class="brand-mark">B</div>
+      <div>
+        <div class="brand-name">Book<span>Hub</span></div>
+        <div class="brand-tag">Espace lecteur</div>
+      </div>
+    </div>
+
+    <nav mat-nav-list class="nav-list">
+      @for (item of navItems; track item.link) {
+        <a mat-list-item [routerLink]="item.link" routerLinkActive="active" (click)="closeDrawer()">
+          <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+          <span matListItemTitle>{{ item.label }}</span>
+        </a>
+      }
+    </nav>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="content-shell">
+    <mat-toolbar class="topbar">
+      <button mat-icon-button type="button" class="menu-button" (click)="toggleDrawer()" aria-label="Ouvrir le menu">
+        <mat-icon>menu</mat-icon>
+      </button>
+
+      <div class="topbar-copy">
+        <p>BookHub</p>
+        <span>Bibliothèque communautaire</span>
+      </div>
+
+      <span class="spacer"></span>
+
+      <div class="profile-chip">
+        <div class="avatar">{{ userInitials }}</div>
+        <div class="profile-meta">
+          <strong>{{ userLabel }}</strong>
+          <span>{{ userEmail }}</span>
+        </div>
+      </div>
+
+      <button mat-stroked-button type="button" class="logout-button" (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        <span>Déconnexion</span>
+      </button>
+    </mat-toolbar>
+
+    <main class="main-content">
+      <router-outlet />
+    </main>
+  </mat-sidenav-content>
+</mat-sidenav-container>
