@@ -43,9 +43,16 @@ export class LoginPageComponent {
       return;
     }
 
-    this.authService.login(this.form.getRawValue());
-    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/dashboard';
-    this.router.navigateByUrl(returnUrl);
+    this.authService.login(this.form.getRawValue()).subscribe({
+      next: () => {
+        // Si login réussi on redirige vers dashboard ou page demandée
+        const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/dashboard';
+        this.router.navigateByUrl(returnUrl);
+      },
+      error: () => {
+        alert('Email ou mot de passe incorrect');
+      },
+    });
   }
 
   devLogin(): void {

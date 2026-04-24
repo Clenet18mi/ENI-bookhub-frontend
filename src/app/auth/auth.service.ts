@@ -1,23 +1,28 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { tap } from 'rxjs';
 
 export interface AuthUser {
-  firstName: string;
-  lastName: string;
   email: string;
-  role: 'reader';
+  role: string;
 }
 
 export interface AuthSession {
-  accessToken: string;
-  refreshToken: string;
-  expiresAt: string;
-  user: AuthUser;
+  accessToken: string; // JWT renvoyé par le backend
+  expiresAt: string; // Date d'expiration côté front
+  user: AuthUser; // Infos utilisateur utiles dans l'app
 }
 
 export interface LoginRequest {
   email: string;
   password: string;
   rememberMe?: boolean;
+}
+
+export interface LoginResponse {
+  token: string; // JWT généré par le backend
+  email: string;
+  role: string;
 }
 
 export interface RegisterRequest {
@@ -29,58 +34,62 @@ export interface RegisterRequest {
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  private readonly http = inject(HttpClient);
+  // URL du backend pour l'authentification
+  private readonly apiUrl = 'http://localhost:8080/api/auth';
+  // Clé utilisée pour stocker la session dans le localStorage
   private readonly sessionKey = 'bookhub_session';
-  private readonly storagePrefix = 'bookhub_';
 
-  login(payload: LoginRequest): AuthSession {
-    return this.startSession(
-      {
-        firstName: this.extractFirstName(payload.email),
-        lastName: 'Lecteur',
+  login(payload: LoginRequest) {
+    return this.http
+      .post<LoginResponse>(`${this.apiUrl}/login`, {
+        // Normalisation de l'email
         email: payload.email.trim().toLowerCase(),
-        role: 'reader',
-      },
-      payload.rememberMe ?? true,
-    );
+        password: payload.password,
+      })
+      .pipe(
+        tap((response) => {
+          // Création de la session côté front avec les infos du backend
+          const session: AuthSession = {
+            accessToken: response.token,
+            expiresAt: this.buildExpiry(),  // expiration alignée sur le JWT (24h)
+            user: {
+              email: response.email,
+              role: response.role,
+            },
+          };
+
+          // Sauvegarde dans le localStorage
+          this.saveSession(session);
+        }),
+      );
   }
 
-  register(payload: RegisterRequest): AuthSession {
-    return this.startSession(
-      {
-        firstName: payload.firstName.trim(),
-        lastName: payload.lastName.trim(),
-        email: payload.email.trim().toLowerCase(),
-        role: 'reader',
-      },
-      true,
-    );
+  register(payload: RegisterRequest) {
+    return this.http.post(`${this.apiUrl}/register`, {
+      firstName: payload.firstName.trim(),
+      lastName: payload.lastName.trim(),
+      email: payload.email.trim().toLowerCase(),
+      password: payload.password,
+    });
   }
-
-  createDevSession(): AuthSession {
-    return this.startSession(
-      {
-        firstName: 'Demo',
-        lastName: 'Lecteur',
-        email: 'dev@bookhub.local',
-        role: 'reader',
-      },
-      true,
-    );
-  }
-
+  // Sauvegarde de la session dans le navigateur
   saveSession(session: AuthSession): void {
     localStorage.setItem(this.sessionKey, JSON.stringify(session));
   }
 
+  //Récupération de la session si elle est valide
   getSession(): AuthSession | null {
     const raw = localStorage.getItem(this.sessionKey);
+
     if (!raw) {
       return null;
     }
 
     try {
       const session = JSON.parse(raw) as AuthSession;
-      if (!session.expiresAt || Number.isNaN(Date.parse(session.expiresAt)) || Date.parse(session.expiresAt) <= Date.now()) {
+      // Verifie si la session est expirée
+      if (!session.expiresAt || Date.parse(session.expiresAt) <= Date.now()) {
         this.clearSession();
         return null;
       }
@@ -92,52 +101,24 @@ export class AuthService {
     }
   }
 
+  // Vérifie si un utilisateur est connecté
   hasValidSession(): boolean {
     return this.getSession() !== null;
   }
 
+  // Supprime la session (logout)
   clearSession(): void {
     localStorage.removeItem(this.sessionKey);
-  }
-
-  resetClientState(): void {
-    Object.keys(localStorage)
-      .filter((key) => key.startsWith(this.storagePrefix))
-      .forEach((key) => localStorage.removeItem(key));
   }
 
   logout(): void {
     this.clearSession();
   }
 
-  private startSession(user: AuthUser, rememberMe: boolean): AuthSession {
-    this.resetClientState();
-
-    const session: AuthSession = {
-      accessToken: this.createToken('access'),
-      refreshToken: this.createToken('refresh'),
-      expiresAt: this.buildExpiry(rememberMe),
-      user,
-    };
-
-    this.saveSession(session);
-    return session;
-  }
-
-  private buildExpiry(rememberMe: boolean): string {
+  // Définit une expiration à 24h (comme le JWT backend)
+  private buildExpiry(): string {
     const expiresAt = new Date();
-    expiresAt.setHours(expiresAt.getHours() + (rememberMe ? 24 * 7 : 8));
+    expiresAt.setHours(expiresAt.getHours() + 24);
     return expiresAt.toISOString();
-  }
-
-  private extractFirstName(email: string): string {
-    const localPart = email.split('@')[0] ?? 'lecteur';
-    const base = localPart.split(/[._-]/)[0] ?? localPart;
-    return base ? base.charAt(0).toUpperCase() + base.slice(1).toLowerCase() : 'Lecteur';
-  }
-
-  private createToken(prefix: string): string {
-    const suffix = globalThis.crypto?.randomUUID?.() ?? `${Math.random().toString(36).slice(2)}-${Date.now()}`;
-    return `${prefix}-${suffix}`;
   }
 }
