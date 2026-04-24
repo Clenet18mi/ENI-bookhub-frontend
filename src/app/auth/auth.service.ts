@@ -1,6 +1,7 @@
-import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { inject, Injectable } from '@angular/core';
 import { tap } from 'rxjs';
+import { environment } from '../../environnments/environment';
 
 export interface AuthUser {
   email: string;
@@ -35,10 +36,8 @@ export interface RegisterRequest {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
-  // URL du backend pour l'authentification
-  private readonly apiUrl = 'http://localhost:8080/api/auth';
-  // Clé utilisée pour stocker la session dans le localStorage
   private readonly sessionKey = 'bookhub_session';
+  private readonly apiUrl = `${environment.apiUrl}/auth`;
 
   login(payload: LoginRequest) {
     return this.http
@@ -52,7 +51,7 @@ export class AuthService {
           // Création de la session côté front avec les infos du backend
           const session: AuthSession = {
             accessToken: response.token,
-            expiresAt: this.buildExpiry(),  // expiration alignée sur le JWT (24h)
+            expiresAt: this.buildExpiry(), // expiration alignée sur le JWT (24h)
             user: {
               email: response.email,
               role: response.role,
@@ -73,12 +72,13 @@ export class AuthService {
       password: payload.password,
     });
   }
+
   // Sauvegarde de la session dans le navigateur
   saveSession(session: AuthSession): void {
     localStorage.setItem(this.sessionKey, JSON.stringify(session));
   }
 
-  //Récupération de la session si elle est valide
+  // Récupération de la session si elle est valide
   getSession(): AuthSession | null {
     const raw = localStorage.getItem(this.sessionKey);
 
@@ -88,7 +88,8 @@ export class AuthService {
 
     try {
       const session = JSON.parse(raw) as AuthSession;
-      // Verifie si la session est expirée
+
+      // Vérifie si la session est expirée
       if (!session.expiresAt || Date.parse(session.expiresAt) <= Date.now()) {
         this.clearSession();
         return null;
@@ -106,7 +107,7 @@ export class AuthService {
     return this.getSession() !== null;
   }
 
-  // Supprime la session (logout)
+  // Supprime la session
   clearSession(): void {
     localStorage.removeItem(this.sessionKey);
   }
@@ -115,7 +116,7 @@ export class AuthService {
     this.clearSession();
   }
 
-  // Définit une expiration à 24h (comme le JWT backend)
+  // Définit une expiration à 24h, alignée sur le JWT backend
   private buildExpiry(): string {
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + 24);
