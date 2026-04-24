@@ -11,9 +11,27 @@ import { AuthService } from '../auth.service';
 
 function matchPasswords(control: AbstractControl): ValidationErrors | null {
   const password = control.get('password')?.value;
-  const confirmPassword = control.get('confirmPassword')?.value;
+  const confirm = control.get('confirmPassword');
 
-  return password && confirmPassword && password !== confirmPassword ? { passwordMismatch: true } : null;
+  if (password !== confirm?.value) {
+    confirm?.setErrors({ passwordMismatch: true });
+    return { passwordMismatch: true };
+  } else {
+    if (confirm?.hasError('passwordMismatch')) {
+      confirm.setErrors(null);
+    }
+    return null;
+  }
+}
+
+function passwordStrengthValidator(control: AbstractControl): ValidationErrors | null {
+  const value = control.value;
+  if (!value) return null; // La validation 'required' s'occupe du vide
+
+  const regex = /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!]).{8,}$/;
+  const valid = regex.test(value);
+
+  return !valid ? { passwordStrength: true } : null;
 }
 
 @Component({
@@ -42,12 +60,13 @@ export class RegisterPageComponent {
       firstName: ['', [Validators.required, Validators.minLength(2)]],
       lastName: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(8)]],
+      password: ['', [Validators.required, Validators.minLength(8), passwordStrengthValidator]],
       confirmPassword: ['', [Validators.required]],
       acceptTerms: [false, [Validators.requiredTrue]],
     },
     { validators: matchPasswords },
   );
+
 
   submit(): void {
     this.form.markAllAsTouched();
@@ -55,8 +74,11 @@ export class RegisterPageComponent {
       return;
     }
 
-    this.authService.register(this.form.getRawValue());
-    this.router.navigateByUrl('/dashboard');
+    this.authService.register(this.form.getRawValue()).subscribe({
+      next: () => this.router.navigate(['login']),
+      error: () => console.log('ERROR'),
+    });
+
   }
 
   hasError(controlName: 'firstName' | 'lastName' | 'email' | 'password' | 'confirmPassword' | 'acceptTerms'): boolean {
@@ -67,4 +89,6 @@ export class RegisterPageComponent {
   get passwordMismatch(): boolean {
     return this.form.touched && this.form.hasError('passwordMismatch');
   }
+
+
 }

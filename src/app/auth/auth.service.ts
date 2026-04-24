@@ -1,10 +1,11 @@
-import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { inject, Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
 
 export interface AuthUser {
   firstName: string;
   lastName: string;
   email: string;
-  role: 'reader';
 }
 
 export interface AuthSession {
@@ -29,8 +30,11 @@ export interface RegisterRequest {
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+
   private readonly sessionKey = 'bookhub_session';
   private readonly storagePrefix = 'bookhub_';
+  private readonly http: HttpClient = inject(HttpClient);
+
 
   login(payload: LoginRequest): AuthSession {
     return this.startSession(
@@ -38,23 +42,15 @@ export class AuthService {
         firstName: this.extractFirstName(payload.email),
         lastName: 'Lecteur',
         email: payload.email.trim().toLowerCase(),
-        role: 'reader',
       },
       payload.rememberMe ?? true,
     );
   }
 
-  register(payload: RegisterRequest): AuthSession {
-    return this.startSession(
-      {
-        firstName: payload.firstName.trim(),
-        lastName: payload.lastName.trim(),
-        email: payload.email.trim().toLowerCase(),
-        role: 'reader',
-      },
-      true,
-    );
+  register(userData: RegisterRequest): Observable<any> {
+    return this.http.post('auth/register', userData);
   }
+
 
   createDevSession(): AuthSession {
     return this.startSession(
@@ -62,7 +58,6 @@ export class AuthService {
         firstName: 'Demo',
         lastName: 'Lecteur',
         email: 'dev@bookhub.local',
-        role: 'reader',
       },
       true,
     );
