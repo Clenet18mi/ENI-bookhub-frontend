@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -37,20 +37,34 @@ export class LoginPageComponent {
     rememberMe: [true],
   });
 
+  readonly loading = signal(false);
+  readonly errorMessage = signal('');
+
   submit(): void {
     this.form.markAllAsTouched();
-    if (this.form.invalid) {
-      return;
-    }
+    if (this.form.invalid) return;
 
-    this.authService.login(this.form.getRawValue());
-    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/dashboard';
-    this.router.navigateByUrl(returnUrl);
-  }
+    this.loading.set(true);
+    this.errorMessage.set('');
 
-  devLogin(): void {
-    this.authService.createDevSession();
-    this.router.navigateByUrl('/dashboard');
+    // Vrai appel HTTP vers POST /api/auth/login
+    this.authService.login(this.form.getRawValue()).subscribe({
+      next: () => {
+        this.loading.set(false);
+        const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/dashboard';
+        this.router.navigateByUrl(returnUrl);
+      },
+      error: (err) => {
+        this.loading.set(false);
+        if (err.status === 401 || err.status === 403) {
+          this.errorMessage.set('Email ou mot de passe incorrect.');
+        } else if (err.status === 0) {
+          this.errorMessage.set('Impossible de contacter le serveur. Vérifiez votre connexion.');
+        } else {
+          this.errorMessage.set('Une erreur est survenue. Veuillez réessayer.');
+        }
+      },
+    });
   }
 
   hasError(controlName: 'email' | 'password'): boolean {

@@ -1,4 +1,4 @@
-import { HostListener, Component, inject } from '@angular/core';
+import { HostListener, Component, inject, OnInit, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -6,6 +6,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { AuthService } from '../../auth/auth.service';
+import { ProfileService, UserProfile } from '../../profile/profile.service';
 
 interface ShellNavItem {
   label: string;
@@ -16,7 +17,16 @@ interface ShellNavItem {
 @Component({
   selector: 'app-shell',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, RouterOutlet, MatButtonModule, MatIconModule, MatListModule, MatSidenavModule, MatToolbarModule],
+  imports: [
+    RouterLink,
+    RouterLinkActive,
+    RouterOutlet,
+    MatButtonModule,
+    MatIconModule,
+    MatListModule,
+    MatSidenavModule,
+    MatToolbarModule,
+  ],
   template: `
     <mat-sidenav-container class="shell">
       <mat-sidenav class="sidenav" [mode]="isMobile ? 'over' : 'side'" [opened]="drawerOpened">
@@ -52,10 +62,10 @@ interface ShellNavItem {
           <span class="spacer"></span>
 
           <a class="profile-chip" routerLink="/profile" aria-label="Ouvrir mon profil">
-            <div class="avatar">{{ userInitials }}</div>
+            <div class="avatar">{{ userInitials() }}</div>
             <div class="profile-meta">
-              <strong>{{ userLabel }}</strong>
-              <span>{{ userEmail }}</span>
+              <strong>{{ userLabel() }}</strong>
+              <span>{{ userEmail() }}</span>
             </div>
           </a>
 
@@ -97,7 +107,7 @@ interface ShellNavItem {
       .spacer { flex: 1; }
       .profile-chip { display: inline-flex; align-items: center; gap: .75rem; padding: .45rem .7rem; border-radius: 999px; background: rgba(31,77,58,.06); text-decoration: none; color: inherit; }
       .profile-chip:hover { background: rgba(31,77,58,.1); }
-      .avatar { background: var(--bh-forest); color: #fff; font-size: .95rem; }
+      .avatar { background: var(--bh-forest); color: #fff; font-size: .95rem; border-radius: 999px; }
       .profile-meta { display: grid; }
       .profile-meta strong { font-size: .95rem; }
       .logout-button { border-radius: 999px; }
@@ -107,8 +117,9 @@ interface ShellNavItem {
     `,
   ],
 })
-export class AppShellComponent {
+export class AppShellComponent implements OnInit {
   private readonly authService = inject(AuthService);
+  private readonly profileService = inject(ProfileService);
   private readonly router = inject(Router);
 
   readonly navItems: ShellNavItem[] = [
@@ -117,29 +128,45 @@ export class AppShellComponent {
     { label: 'Mes emprunts', icon: 'calendar_month', link: '/loans' },
   ];
 
+  // Profil chargé depuis l'API — signal pour réactivité
+  private readonly userProfile = signal<UserProfile | null>(null);
+
   protected isMobile = typeof window !== 'undefined' ? window.innerWidth < 960 : false;
   protected drawerOpened = !this.isMobile;
 
-  get userLabel(): string {
-    const session = this.authService.getSession();
-    if (!session) {
-      return 'Invité';
-    }
-
-    return `${session.user.firstName} ${session.user.lastName}`.trim();
+  ngOnInit(): void {
+    // Charge le vrai profil dès l'ouverture du shell
+    this.profileService.getProfile().subscribe({
+      next: (profile) => this.userProfile.set(profile),
+      error: () => {
+        // En cas d'erreur (token expiré, etc.), déconnexion propre
+        this.authService.logout();
+        this.router.navigateByUrl('/login');
+      },
+    });
   }
 
-  get userEmail(): string {
-    return this.authService.getSession()?.user.email ?? 'Connexion locale';
+  userLabel(): string {
+    const p = this.userProfile();
+    if (p) return `${p.firstName} ${p.lastName}`.trim();
+    // Fallback : extraire le prénom depuis la session pendant le chargement
+    const session = this.authService.getSession();
+    return session?.user.firstName ?? 'Chargement…';
   }
 
-  get userInitials(): string {
-    const session = this.authService.getSession();
-    if (!session) {
-      return 'BH';
-    }
+  userEmail(): string {
+    return this.userProfile()?.email ?? this.authService.getSession()?.user.email ?? '';
+  }
 
-    return `${session.user.firstName.charAt(0)}${session.user.lastName.charAt(0)}`.toUpperCase();
+  userInitials(): string {
+    const p = this.userProfile();
+    if (p) {
+      const f = p.firstName?.[0] ?? '';
+      const l = p.lastName?.[0] ?? '';
+      return (f + l).toUpperCase() || 'BH';
+    }
+    const session = this.authService.getSession();
+    return session?.user.firstName?.[0]?.toUpperCase() ?? 'BH';
   }
 
   logout(): void {
