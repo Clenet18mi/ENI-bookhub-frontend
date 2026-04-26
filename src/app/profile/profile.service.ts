@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal  } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 
@@ -27,7 +27,7 @@ export interface ChangePasswordPayload {
 @Injectable({ providedIn: 'root' })
 export class ProfileService {
   private readonly http = inject(HttpClient);
-
+  readonly currentProfile = signal<UserProfile | null>(null);
   /** GET /api/users/me */
   getProfile(): Observable<UserProfile> {
     return this.http.get<UserProfile>('users/me');
