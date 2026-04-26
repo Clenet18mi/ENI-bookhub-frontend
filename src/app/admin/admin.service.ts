@@ -24,6 +24,30 @@ export interface AdminStats {
   totalBooks: number;
   activeLoans: number;
   overdueLoans: number;
+  totalReservations?: number;
+  pendingReservations?: number;
+  returnedThisMonth?: number;
+  mostBorrowedCategory?: string;
+}
+
+export interface AdminLoan {
+  id: number;
+  bookTitle: string;
+  bookAuthor: string;
+  bookIsbn?: string;
+  loanDate: string;
+  dueDate: string;
+  returnDate: string | null;
+  status: 'ACTIVE' | 'RETURNED' | 'OVERDUE';
+}
+
+export interface AdminReservation {
+  id: number;
+  bookTitle: string;
+  bookAuthor: string;
+  reservationDate: string;
+  rank: number;
+  status: 'PENDING' | 'AVAILABLE' | 'BORROWED' | 'CANCELLED';
 }
 
 // ─── Service ──────────────────────────────────────────────────────────────────
@@ -32,50 +56,54 @@ export interface AdminStats {
 export class AdminService {
   private readonly http = inject(HttpClient);
 
-  /** Cache réactif de la liste des utilisateurs */
   readonly users = signal<AdminUser[]>([]);
   readonly stats = signal<AdminStats | null>(null);
 
-  // ── Statistiques ────────────────────────────────────────────────────────────
+  // ── Statistiques ──────────────────────────────────────────────────────────
 
-  /** GET /api/admin/stats */
   loadStats(): Observable<AdminStats> {
     return this.http.get<AdminStats>('admin/stats').pipe(
       tap((s) => this.stats.set(s))
     );
   }
 
-  // ── Utilisateurs ────────────────────────────────────────────────────────────
+  // ── Utilisateurs ──────────────────────────────────────────────────────────
 
-  /** GET /api/admin/users */
   loadUsers(): Observable<AdminUser[]> {
     return this.http.get<AdminUser[]>('admin/users').pipe(
       tap((list) => this.users.set(list))
     );
   }
 
-  /** PATCH /api/admin/users/{id}/role */
   updateRole(id: number, role: UserRole): Observable<AdminUser> {
     return this.http.patch<AdminUser>(`admin/users/${id}/role`, { role }).pipe(
       tap((updated) => this.replaceInCache(updated))
     );
   }
 
-  /** PATCH /api/admin/users/{id}/activate */
   activateUser(id: number): Observable<AdminUser> {
     return this.http.patch<AdminUser>(`admin/users/${id}/activate`, {}).pipe(
       tap((updated) => this.replaceInCache(updated))
     );
   }
 
-  /** PATCH /api/admin/users/{id}/deactivate */
   deactivateUser(id: number): Observable<AdminUser> {
     return this.http.patch<AdminUser>(`admin/users/${id}/deactivate`, {}).pipe(
       tap((updated) => this.replaceInCache(updated))
     );
   }
 
-  // ── Helpers ─────────────────────────────────────────────────────────────────
+  // ── Détails utilisateur ───────────────────────────────────────────────────
+
+  getUserLoans(userId: number): Observable<AdminLoan[]> {
+    return this.http.get<AdminLoan[]>(`admin/users/${userId}/loans`);
+  }
+
+  getUserReservations(userId: number): Observable<AdminReservation[]> {
+    return this.http.get<AdminReservation[]>(`admin/users/${userId}/reservations`);
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
 
   private replaceInCache(updated: AdminUser): void {
     this.users.update((list) =>
