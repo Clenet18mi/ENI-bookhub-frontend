@@ -128,16 +128,13 @@ export class AppShellComponent implements OnInit {
     { label: 'Mes emprunts', icon: 'calendar_month', link: '/loans' },
   ];
 
-  // Profil chargé depuis l'API — signal pour réactivité
-  private readonly userProfile = signal<UserProfile | null>(null);
-
   protected isMobile = typeof window !== 'undefined' ? window.innerWidth < 960 : false;
   protected drawerOpened = !this.isMobile;
 
   ngOnInit(): void {
     // Charge le vrai profil dès l'ouverture du shell
     this.profileService.getProfile().subscribe({
-      next: (profile) => this.userProfile.set(profile),
+      next: () => {},
       error: () => {
         // En cas d'erreur (token expiré, etc.), déconnexion propre
         this.authService.logout();
@@ -147,19 +144,19 @@ export class AppShellComponent implements OnInit {
   }
 
   userLabel(): string {
-    const p = this.userProfile();
+    const p = this.profileService.currentProfile();
     if (p) return `${p.firstName} ${p.lastName}`.trim();
-    // Fallback : extraire le prénom depuis la session pendant le chargement
     const session = this.authService.getSession();
     return session?.user.firstName ?? 'Chargement…';
   }
 
   userEmail(): string {
-    return this.userProfile()?.email ?? this.authService.getSession()?.user.email ?? '';
+    return this.profileService.currentProfile()?.email
+      ?? this.authService.getSession()?.user.email ?? '';
   }
 
   userInitials(): string {
-    const p = this.userProfile();
+    const p = this.profileService.currentProfile();
     if (p) {
       const f = p.firstName?.[0] ?? '';
       const l = p.lastName?.[0] ?? '';

@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -372,7 +372,7 @@ export class ProfileComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly profileService = inject(ProfileService);
   private readonly snackBar = inject(MatSnackBar);
-
+  private readonly cdr = inject(ChangeDetectorRef);
   readonly profileForm = this.fb.nonNullable.group({
     firstName: ['', Validators.required],
     lastName:  ['', Validators.required],
@@ -384,23 +384,25 @@ export class ProfileComponent implements OnInit {
     newPassword:     ['', [Validators.required, Validators.minLength(8)]],
   });
 
-  ngOnInit(): void {
-    this.profileService.getProfile().subscribe({
-      next: (data) => {
-        this.profile.set(data);
+ngOnInit(): void {
+  this.profileService.getProfile().subscribe({
+    next: (data) => {
+      this.profile.set(data);
+      this.loading.set(false);
+      setTimeout(() => {
         this.profileForm.patchValue({
           firstName: data.firstName ?? '',
           lastName:  data.lastName ?? '',
           phone:     data.phone ?? '',
         });
-        this.loading.set(false);
-      },
-      error: () => {
-        this.loading.set(false);
-        this.loadError.set(true);
-      },
-    });
-  }
+      });
+    },
+    error: () => {
+      this.loading.set(false);
+      this.loadError.set(true);
+    },
+  });
+}
 
   onUpdateProfile(): void {
     if (this.profileForm.invalid) return;

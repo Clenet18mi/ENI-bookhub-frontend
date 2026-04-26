@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 
 export interface UserProfile {
   id: number;
@@ -35,7 +35,9 @@ export class ProfileService {
 
   /** PATCH /api/users/me */
   updateProfile(payload: UpdateProfilePayload): Observable<UserProfile> {
-    return this.http.patch<UserProfile>('users/me', payload);
+    return this.http.patch<UserProfile>('users/me', payload).pipe(
+      tap((updated) => this.currentProfile.set(updated))
+    );
   }
 
   /** PATCH /api/users/me/password */
