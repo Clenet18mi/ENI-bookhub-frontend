@@ -47,7 +47,7 @@ export interface AdminReservation {
   bookAuthor: string;
   reservationDate: string;
   rank: number;
-  status: 'PENDING' | 'AVAILABLE' | 'BORROWED' | 'CANCELLED';
+  status: 'PENDING' | 'WAITING' | 'AVAILABLE' | 'BORROWED' | 'CANCELLED' | 'CANCELED';
 }
 
 // ─── Service ──────────────────────────────────────────────────────────────────
@@ -101,6 +101,11 @@ export class AdminService {
 
   getUserReservations(userId: number): Observable<AdminReservation[]> {
     return this.http.get<AdminReservation[]>(`admin/users/${userId}/reservations`);
+  }
+
+  /** Vérifie si un user a des réservations actives avant de le désactiver. */
+  hasActiveReservations(userId: number): Observable<{ hasActive: boolean }> {
+    return this.http.get<{ hasActive: boolean }>(`admin/users/${userId}/has-active-reservations`);
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────

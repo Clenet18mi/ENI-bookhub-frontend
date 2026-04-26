@@ -7,8 +7,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { ProfileService, UserProfile } from './profile.service';
+import { AuthService } from '../auth/auth.service';
 
 /** Formate le libellé du rôle pour l'affichage */
 function formatRole(role: string): string {
@@ -37,6 +40,7 @@ function initiale(profile: UserProfile): string {
     MatIconModule,
     MatInputModule,
     MatSnackBarModule,
+    MatDialogModule,
     MatProgressSpinnerModule,
   ],
   template: `
@@ -185,6 +189,29 @@ function initiale(profile: UserProfile): string {
               </p>
             </mat-card-content>
           </mat-card>
+
+          <!-- Zone danger : suppression de compte -->
+          <mat-card class="danger-zone-card">
+            <mat-card-header>
+              <mat-icon class="danger-icon">warning</mat-icon>
+              <mat-card-title>Zone de danger</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <p class="danger-desc">
+                La suppression de votre compte est irréversible. Toutes vos données seront anonymisées.
+              </p>
+              <p class="danger-desc warn-reservations" *ngIf="deletionBlocked()">
+                <mat-icon>block</mat-icon>
+                Vous avez des réservations en cours. Annulez-les avant de supprimer votre compte.
+              </p>
+            </mat-card-content>
+            <mat-card-actions>
+              <button mat-stroked-button color="warn" (click)="onDeleteAccount()" [disabled]="deletingAccount()">
+                <mat-icon>delete_forever</mat-icon>
+                Supprimer mon compte
+              </button>
+            </mat-card-actions>
+          </mat-card>
         </div>
       </div>
     </section>
@@ -316,6 +343,26 @@ function initiale(profile: UserProfile): string {
       margin-top: 0.5rem;
     }
 
+    .danger-zone-card {
+      border: 1px solid #fca5a5 !important;
+      background: #fff7f7 !important;
+    }
+    .danger-zone-card mat-card-header {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+    .danger-icon { color: #ef4444; margin-right: .5rem; }
+    .danger-desc { color: #64748b; font-size: .9rem; margin: .5rem 0; }
+    .warn-reservations {
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+      color: #b91c1c !important;
+      font-weight: 600;
+    }
+    .warn-reservations mat-icon { font-size: 1.1rem; width: 1.1rem; height: 1.1rem; }
+
     .account-info-card mat-card-content p {
       margin: 0.35rem 0;
       font-size: 0.9rem;
@@ -373,6 +420,12 @@ export class ProfileComponent implements OnInit {
   private readonly profileService = inject(ProfileService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly dialog = inject(MatDialog);
+  private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
+
+  readonly deletionBlocked = signal(false);
+  readonly deletingAccount = signal(false);
   readonly profileForm = this.fb.nonNullable.group({
     firstName: ['', Validators.required],
     lastName:  ['', Validators.required],
@@ -420,6 +473,44 @@ ngOnInit(): void {
           duration: 4000,
           panelClass: 'snack-error',
         });
+      },
+    });
+  }
+
+  onDeleteAccount(): void {
+    // Vérifier d'abord les réservations actives
+    this.profileService.hasActiveReservations().subscribe({
+      next: ({ hasActive }) => {
+        if (hasActive) {
+          this.deletionBlocked.set(true);
+          this.snackBar.open(
+            'Impossible de supprimer votre compte : vous avez des réservations en cours.',
+            'Fermer',
+            { duration: 6000, panelClass: 'snack-error' }
+          );
+          return;
+        }
+        // Pas de réservations actives → demander confirmation
+        const confirmed = window.confirm(
+          'Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.'
+        );
+        if (!confirmed) return;
+
+        this.deletingAccount.set(true);
+        this.profileService.deleteAccount().subscribe({
+          next: () => {
+            this.authService.logout();
+            this.router.navigate(['/login']);
+          },
+          error: (err) => {
+            this.deletingAccount.set(false);
+            const msg = err?.error?.message ?? 'Erreur lors de la suppression du compte.';
+            this.snackBar.open(msg, 'Fermer', { duration: 6000, panelClass: 'snack-error' });
+          },
+        });
+      },
+      error: () => {
+        this.snackBar.open('Impossible de vérifier vos réservations.', 'Fermer', { duration: 4000 });
       },
     });
   }

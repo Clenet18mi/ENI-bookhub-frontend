@@ -39,11 +39,11 @@ export interface RoleStat {
 export interface ActivityItem {
   type: 'loan' | 'return' | 'register' | 'reservation';
   userName: string;
-  bookTitle?: string;
+  bookTitle?: string | null;
   date: string;
 }
 
-// ─── Données fictives de démonstration ───────────────────────────────────────
+// ─── Données de démonstration (fallback si backend non disponible) ─────────────
 
 const MOCK_STATS: AdminDashboardStats = {
   totalUsers: 47,
@@ -77,13 +77,13 @@ const MOCK_STATS: AdminDashboardStats = {
     { role: 'Administrateurs', count: 2 },
   ],
   recentActivity: [
-    { type: 'loan', userName: 'Claire Lefebvre', bookTitle: 'Fondation', date: '2026-04-26' },
-    { type: 'return', userName: 'David Moreau', bookTitle: '1984', date: '2026-04-25' },
-    { type: 'register', userName: 'Lucas Martin', date: '2026-04-25' },
-    { type: 'reservation', userName: 'Emma Simon', bookTitle: 'Dune', date: '2026-04-24' },
-    { type: 'loan', userName: 'François Bernard', bookTitle: 'Harry Potter', date: '2026-04-24' },
-    { type: 'return', userName: 'Alice Dupont', bookTitle: 'Le Petit Prince', date: '2026-04-23' },
-    { type: 'loan', userName: 'Sophie Laurent', bookTitle: 'Clean Code', date: '2026-04-22' },
+    { type: 'loan',        userName: 'Claire Lefebvre',  bookTitle: 'Fondation',       date: '2026-04-26' },
+    { type: 'return',      userName: 'David Moreau',     bookTitle: '1984',             date: '2026-04-25' },
+    { type: 'register',    userName: 'Lucas Martin',     bookTitle: null,               date: '2026-04-25' },
+    { type: 'reservation', userName: 'Emma Simon',       bookTitle: 'Dune',             date: '2026-04-24' },
+    { type: 'loan',        userName: 'François Bernard', bookTitle: 'Harry Potter',     date: '2026-04-24' },
+    { type: 'return',      userName: 'Alice Dupont',     bookTitle: 'Le Petit Prince',  date: '2026-04-23' },
+    { type: 'loan',        userName: 'Sophie Laurent',   bookTitle: 'Clean Code',       date: '2026-04-22' },
   ],
 };
 
@@ -92,6 +92,10 @@ export class AdminDashboardService {
   private readonly http = inject(HttpClient);
   readonly dashStats = signal<AdminDashboardStats | null>(null);
 
+  /**
+   * Charge les statistiques du tableau de bord depuis GET /api/admin/dashboard.
+   * Si l'API n'est pas disponible, utilise les données de démonstration.
+   */
   loadDashboardStats(): Observable<AdminDashboardStats> {
     return this.http.get<AdminDashboardStats>('admin/dashboard').pipe(
       tap((s) => this.dashStats.set(s)),

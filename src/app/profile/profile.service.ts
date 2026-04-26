@@ -45,4 +45,17 @@ export class ProfileService {
   changePassword(payload: ChangePasswordPayload): Observable<void> {
     return this.http.patch<void>('users/me/password', payload);
   }
+
+  /** GET /api/users/me/has-active-reservations */
+  hasActiveReservations(): Observable<{ hasActive: boolean }> {
+    return this.http.get<{ hasActive: boolean }>('users/me/has-active-reservations');
+  }
+
+  /**
+   * DELETE /api/users/me
+   * Supprime le compte. Retourne 409 si des réservations actives existent.
+   */
+  deleteAccount(): Observable<void> {
+    return this.http.delete<void>('users/me');
+  }
 }
