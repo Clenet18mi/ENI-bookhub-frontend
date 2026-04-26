@@ -296,6 +296,15 @@ export class ConfirmDialogComponent {
                   Activer
                 </button>
               }
+              <button
+                mat-stroked-button
+                color="warn"
+                class="delete-account-btn"
+                [disabled]="user.id === currentUserId"
+                (click)="deleteUserAccount(user)">
+                <mat-icon>delete_forever</mat-icon>
+                Supprimer
+              </button>
             </div>
           </section>
 
@@ -664,47 +673,59 @@ export class ConfirmDialogComponent {
     /* ── Cartes emprunts/réservations ─────────────────────────────────────────── */
     .loan-list { display: flex; flex-direction: column; gap: .6rem; }
     .loan-card {
-      display: flex; align-items: center; gap: .75rem;
+      display: grid;
+      grid-template-columns: 4px 1fr auto;
+      grid-template-rows: auto auto;
+      column-gap: .85rem;
+      row-gap: .5rem;
       padding: .9rem 1rem;
       border-radius: 12px;
       border: 1px solid rgba(0,0,0,.07);
       background: #fafafa;
-      overflow: hidden;
-      position: relative;
     }
     .loan-card.overdue { background: #fff7f7; border-color: #fca5a5; }
-    .loan-status-bar { width: 4px; height: 100%; border-radius: 2px; flex-shrink: 0; min-height: 40px; }
+    .loan-status-bar {
+      grid-column: 1; grid-row: 1 / 3;
+      width: 4px; border-radius: 2px; align-self: stretch; min-height: 40px;
+    }
     .bar-active    { background: #22c55e; }
     .bar-returned  { background: #94a3b8; }
     .bar-overdue   { background: #ef4444; }
     .bar-pending   { background: #f59e0b; }
+    .bar-waiting   { background: #f59e0b; }
     .bar-available { background: #22c55e; }
     .bar-cancelled { background: #94a3b8; }
+    .bar-canceled  { background: #94a3b8; }
     .bar-borrowed  { background: #6366f1; }
 
-    .loan-info { display: flex; flex-direction: column; flex: 1; min-width: 0; }
-    .loan-title { font-size: .9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .loan-info { grid-column: 2; grid-row: 1; display: flex; flex-direction: column; min-width: 0; }
+    .loan-title { font-size: .9rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .loan-author { font-size: .8rem; color: var(--bh-ink-light); }
-    .loan-isbn { font-size: .75rem; color: var(--bh-ink-light); font-family: monospace; }
+    .loan-isbn { font-size: .72rem; color: var(--bh-ink-light); font-family: monospace; margin-top: .1rem; }
 
-    .loan-dates { display: flex; gap: .6rem; flex-wrap: wrap; }
-    .date-pair { display: flex; flex-direction: column; }
+    .loan-dates { grid-column: 2; grid-row: 2; display: flex; gap: 1.2rem; flex-wrap: wrap; }
+    .date-pair { display: flex; flex-direction: column; gap: .1rem; }
+    .date-pair .info-label { font-size: .7rem; text-transform: uppercase; letter-spacing: .04em; color: var(--bh-ink-light); font-weight: 600; }
     .date-pair span:last-child { font-size: .85rem; font-weight: 500; }
-    .overdue-text { color: #ef4444; font-weight: 700; }
+    .overdue-text { color: #ef4444 !important; font-weight: 700 !important; }
     .returned-text { color: #15803d; }
 
     .loan-status-chip {
+      grid-column: 3; grid-row: 1; align-self: start;
       padding: .25rem .65rem; border-radius: 999px;
-      font-size: .75rem; font-weight: 700; flex-shrink: 0;
-      white-space: nowrap;
+      font-size: .75rem; font-weight: 700; white-space: nowrap;
     }
     .chip-active    { background: #dcfce7; color: #15803d; }
     .chip-returned  { background: #f1f5f9; color: #64748b; }
     .chip-overdue   { background: #fee2e2; color: #b91c1c; }
     .chip-pending   { background: #fef3c7; color: #92400e; }
+    .chip-waiting   { background: #fef3c7; color: #92400e; }
     .chip-available { background: #dcfce7; color: #15803d; }
     .chip-cancelled { background: #f1f5f9; color: #64748b; }
+    .chip-canceled  { background: #f1f5f9; color: #64748b; }
     .chip-borrowed  { background: #ede9fe; color: #5b21b6; }
+
+    .delete-account-btn { margin-left: .25rem; }
 
     /* ── Mobile ──────────────────────────────────────────────────────────────── */
     @media (max-width: 1023px) {
@@ -830,11 +851,32 @@ export class AdminComponent implements OnInit {
   }
 
   toggleActive(user: AdminUser, activate: boolean): void {
+    if (activate) {
+      // Activation simple — pas de vérification nécessaire
+      this.openToggleDialog(user, true, false);
+      return;
+    }
+    // Désactivation : vérifier d'abord les réservations actives
+    this.adminService.hasActiveReservations(user.id).subscribe({
+      next: ({ hasActive }) => this.openToggleDialog(user, false, hasActive),
+      error: () => this.openToggleDialog(user, false, false), // si erreur, on laisse passer
+    });
+  }
+
+  private openToggleDialog(user: AdminUser, activate: boolean, hasActiveReservations: boolean): void {
     const ref = this.dialog.open(ConfirmDialogComponent);
+
+    const warningLine = hasActiveReservations
+      ? `
+
+⚠️ Cet utilisateur a des réservations en cours. Elles seront automatiquement annulées.`
+      : '';
+
     ref.componentInstance.data = {
       title: activate ? 'Activer le compte' : 'Désactiver le compte',
-      message: `Voulez-vous ${activate ? 'activer' : 'désactiver'} le compte de ${user.firstName} ${user.lastName} ?`,
+      message: `Voulez-vous ${activate ? 'activer' : 'désactiver'} le compte de ${user.firstName} ${user.lastName} ?${warningLine}`,
     };
+
     ref.afterClosed().subscribe((confirmed) => {
       if (!confirmed) return;
       const call$ = activate
@@ -843,9 +885,37 @@ export class AdminComponent implements OnInit {
       call$.subscribe({
         next: (updated) => {
           this.selectedUser.set(updated);
-          this.snack(`Compte ${activate ? 'activé' : 'désactivé'} avec succès.`);
+          const extra = (updated as any).hadActiveReservations
+            ? ' Les réservations en cours ont été annulées.'
+            : '';
+          this.snack(`Compte ${activate ? 'activé' : 'désactivé'} avec succès.${extra}`);
         },
         error: (err) => this.snack(err?.error?.message ?? 'Erreur.', true),
+      });
+    });
+  }
+
+  deleteUserAccount(user: AdminUser): void {
+    const ref = this.dialog.open(ConfirmDialogComponent);
+    ref.componentInstance.data = {
+      title: 'Supprimer le compte',
+      message: `Supprimer définitivement le compte de ${user.firstName} ${user.lastName} ?\n\nSes réservations actives seront annulées. Cette action est irréversible.`,
+    };
+    ref.afterClosed().subscribe((confirmed) => {
+      if (!confirmed) return;
+      this.adminService.deleteUser(user.id).subscribe({
+        next: ({ hadActiveLoans }) => {
+          // Retirer l'user de la liste
+          this.adminService.users.update((list: AdminUser[]) =>
+            list.filter((u: AdminUser) => u.id !== user.id)
+          );
+          this.selectedUser.set(null);
+          const warn = hadActiveLoans
+            ? ' ⚠️ Des emprunts non rendus existent encore sur ce compte.'
+            : '';
+          this.snack(`Compte supprimé avec succès.${warn}`);
+        },
+        error: (err) => this.snack(err?.error?.message ?? 'Erreur lors de la suppression.', true),
       });
     });
   }
