@@ -30,7 +30,8 @@ export class ProfileService {
   readonly currentProfile = signal<UserProfile | null>(null);
   /** GET /api/users/me */
   getProfile(): Observable<UserProfile> {
-    return this.http.get<UserProfile>('users/me');
+   return this.http.get<UserProfile>('users/me').pipe(
+    tap((profile) => this.currentProfile.set(profile)));
   }
 
   /** PATCH /api/users/me */

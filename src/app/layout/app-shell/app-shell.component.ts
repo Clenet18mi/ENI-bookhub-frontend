@@ -1,4 +1,4 @@
-import { HostListener, Component, inject, OnInit, signal } from '@angular/core';
+import { HostListener, Component, inject, OnInit, computed } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -39,7 +39,7 @@ interface ShellNavItem {
         </div>
 
         <nav mat-nav-list class="nav-list">
-          @for (item of navItems; track item.link) {
+          @for (item of navItems(); track item.link) {
             <a mat-list-item [routerLink]="item.link" routerLinkActive="active" (click)="closeDrawer()">
               <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
               <span matListItemTitle>{{ item.label }}</span>
@@ -122,11 +122,17 @@ export class AppShellComponent implements OnInit {
   private readonly profileService = inject(ProfileService);
   private readonly router = inject(Router);
 
-  readonly navItems: ShellNavItem[] = [
-    { label: 'Tableau de bord', icon: 'space_dashboard', link: '/dashboard' },
-    { label: 'Catalogue', icon: 'local_library', link: '/catalogue' },
-    { label: 'Mes emprunts', icon: 'calendar_month', link: '/loans' },
-  ];
+  readonly navItems = computed<ShellNavItem[]>(() => {
+    const base: ShellNavItem[] = [
+      { label: 'Tableau de bord', icon: 'space_dashboard', link: '/dashboard' },
+      { label: 'Catalogue',       icon: 'local_library',   link: '/catalogue' },
+      { label: 'Mes emprunts',    icon: 'calendar_month',  link: '/loans' },
+    ];
+    if (this.profileService.currentProfile()?.role === 'ROLE_ADMIN') {
+      base.push({ label: 'Administration', icon: 'admin_panel_settings', link: '/admin' });
+    }
+    return base;
+  });
 
   protected isMobile = typeof window !== 'undefined' ? window.innerWidth < 960 : false;
   protected drawerOpened = !this.isMobile;
@@ -187,3 +193,4 @@ export class AppShellComponent implements OnInit {
     this.drawerOpened = !this.isMobile;
   }
 }
+

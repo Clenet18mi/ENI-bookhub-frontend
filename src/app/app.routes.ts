@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './auth/auth.guard';
+import { adminGuard } from './admin/admin.guard';      // ← NOUVEAU
 
 export const routes: Routes = [
   {
@@ -28,10 +29,11 @@ export const routes: Routes = [
         path: 'profile',
         loadComponent: () => import('./profile/profile.component').then((m) => m.ProfileComponent),
       },
-      // {
-      //   path: 'prout',
-      //   loadComponent: () => import('./profile/profile.component').then((m) => m.ProfileComponent),
-      // }
+      {
+        path: 'admin',
+        canActivate: [adminGuard],                     // ← guard de rôle
+        loadComponent: () => import('./admin/admin.component').then((m) => m.AdminComponent),
+      },
     ],
   },
   {
