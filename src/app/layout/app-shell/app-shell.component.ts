@@ -61,22 +61,6 @@ interface ShellNavItem {
             </a>
           }
         </nav>
-
-        <!-- Profil dans la sidebar — masqué pour admin (il a la topbar) -->
-        @if (!isAdmin()) {
-          <div class="sidebar-profile">
-            <a class="sidebar-profile-chip" routerLink="/profile" (click)="closeDrawer()">
-              <div class="avatar">{{ userInitials() }}</div>
-              <div class="profile-meta">
-                <strong>{{ userLabel() }}</strong>
-                <span>{{ userEmail() }}</span>
-              </div>
-            </a>
-            <button mat-icon-button class="logout-icon-btn" (click)="logout()" matTooltip="Déconnexion">
-              <mat-icon>logout</mat-icon>
-            </button>
-          </div>
-        }
       </mat-sidenav>
 
       <mat-sidenav-content class="content-shell">

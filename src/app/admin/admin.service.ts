@@ -108,6 +108,11 @@ export class AdminService {
     return this.http.get<{ hasActive: boolean }>(`admin/users/${userId}/has-active-reservations`);
   }
 
+  /** Supprime définitivement un compte utilisateur (admin only). */
+  deleteUser(userId: number): Observable<{ hadActiveLoans: boolean }> {
+    return this.http.delete<{ hadActiveLoans: boolean }>(`admin/users/${userId}`);
+  }
+
   // ── Helpers ───────────────────────────────────────────────────────────────
 
   private replaceInCache(updated: AdminUser): void {

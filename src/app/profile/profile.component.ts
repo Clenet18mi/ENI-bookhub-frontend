@@ -202,7 +202,7 @@ function initiale(profile: UserProfile): string {
               </p>
               <p class="danger-desc warn-reservations" *ngIf="deletionBlocked()">
                 <mat-icon>block</mat-icon>
-                Vous avez des réservations en cours. Annulez-les avant de supprimer votre compte.
+                Vous avez des emprunts ou réservations en cours. Retournez vos livres et annulez vos réservations avant de supprimer votre compte.
               </p>
             </mat-card-content>
             <mat-card-actions>

@@ -296,6 +296,15 @@ export class ConfirmDialogComponent {
                   Activer
                 </button>
               }
+              <button
+                mat-stroked-button
+                color="warn"
+                class="delete-account-btn"
+                [disabled]="user.id === currentUserId"
+                (click)="deleteUserAccount(user)">
+                <mat-icon>delete_forever</mat-icon>
+                Supprimer
+              </button>
             </div>
           </section>
 
@@ -716,6 +725,8 @@ export class ConfirmDialogComponent {
     .chip-canceled  { background: #f1f5f9; color: #64748b; }
     .chip-borrowed  { background: #ede9fe; color: #5b21b6; }
 
+    .delete-account-btn { margin-left: .25rem; }
+
     /* ── Mobile ──────────────────────────────────────────────────────────────── */
     @media (max-width: 1023px) {
       .hidden-mobile { display: none; }
@@ -880,6 +891,31 @@ export class AdminComponent implements OnInit {
           this.snack(`Compte ${activate ? 'activé' : 'désactivé'} avec succès.${extra}`);
         },
         error: (err) => this.snack(err?.error?.message ?? 'Erreur.', true),
+      });
+    });
+  }
+
+  deleteUserAccount(user: AdminUser): void {
+    const ref = this.dialog.open(ConfirmDialogComponent);
+    ref.componentInstance.data = {
+      title: 'Supprimer le compte',
+      message: `Supprimer définitivement le compte de ${user.firstName} ${user.lastName} ?\n\nSes réservations actives seront annulées. Cette action est irréversible.`,
+    };
+    ref.afterClosed().subscribe((confirmed) => {
+      if (!confirmed) return;
+      this.adminService.deleteUser(user.id).subscribe({
+        next: ({ hadActiveLoans }) => {
+          // Retirer l'user de la liste
+          this.adminService.users.update((list: AdminUser[]) =>
+            list.filter((u: AdminUser) => u.id !== user.id)
+          );
+          this.selectedUser.set(null);
+          const warn = hadActiveLoans
+            ? ' ⚠️ Des emprunts non rendus existent encore sur ce compte.'
+            : '';
+          this.snack(`Compte supprimé avec succès.${warn}`);
+        },
+        error: (err) => this.snack(err?.error?.message ?? 'Erreur lors de la suppression.', true),
       });
     });
   }
