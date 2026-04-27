@@ -475,14 +475,25 @@ export class DashboardComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.dashService.loadDashboardStats().subscribe({
-      next: () => this.loading.set(false),
-      error: () => this.loading.set(false),
-    });
+    if (!this.isAdmin()) {
+      this.loading.set(false);
+      return;
+    }
+
+    this.loadAdminDashboard();
   }
 
   reload(): void {
+    if (!this.isAdmin()) {
+      return;
+    }
+
+    this.loadAdminDashboard();
+  }
+
+  private loadAdminDashboard(): void {
     this.loading.set(true);
+
     this.dashService.loadDashboardStats().subscribe({
       next: () => this.loading.set(false),
       error: () => this.loading.set(false),
