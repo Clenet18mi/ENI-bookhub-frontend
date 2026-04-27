@@ -6,6 +6,7 @@ export interface AuthUser {
   firstName: string;
   lastName: string;
   email: string;
+  role: 'ROLE_USER' | 'ROLE_LIBRARIAN' | 'ROLE_ADMIN';
 }
 
 export interface AuthSession {
@@ -31,7 +32,7 @@ export interface RegisterRequest {
 interface LoginResponseDTO {
   token: string;
   email: string;
-  role: string;
+  role: 'ROLE_USER' | 'ROLE_LIBRARIAN' | 'ROLE_ADMIN';
 }
 
 @Injectable({ providedIn: 'root' })
@@ -53,11 +54,12 @@ export class AuthService {
       tap((response) => {
         const session: AuthSession = {
           accessToken: response.token,
-          expiresAt: this.buildExpiry(payload.rememberMe ?? true),
+          expiresAt: this.buildExpiry(),
           user: {
             firstName: this.extractFirstName(response.email),
             lastName: '',
             email: response.email,
+            role: response.role,
           },
         };
         this.saveSession(session);
@@ -89,6 +91,9 @@ export class AuthService {
       return null;
     }
   }
+  getRole(): string | null {
+    return this.getSession()?.user.role ?? null;
+  }
 
   getToken(): string | null {
     return this.getSession()?.accessToken ?? null;
@@ -112,9 +117,10 @@ export class AuthService {
     this.clearSession();
   }
 
-  private buildExpiry(rememberMe: boolean): string {
+  // Expiration côté front alignée sur le JWT backend : 24h
+  private buildExpiry(): string {
     const expiresAt = new Date();
-    expiresAt.setHours(expiresAt.getHours() + (rememberMe ? 24 * 7 : 8));
+    expiresAt.setHours(expiresAt.getHours() + 24);
     return expiresAt.toISOString();
   }
 

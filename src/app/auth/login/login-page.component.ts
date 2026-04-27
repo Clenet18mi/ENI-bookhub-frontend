@@ -73,11 +73,31 @@ export class LoginPageComponent implements OnInit {
 
     // Vrai appel HTTP vers POST /api/auth/login
     this.authService.login(this.form.getRawValue()).subscribe({
-      next: () => {
-        this.loading.set(false);
-        const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/dashboard';
-        this.router.navigateByUrl(returnUrl);
-      },
+        next: (response) => {
+          this.loading.set(false);
+
+          const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+
+          if (returnUrl) {
+            this.router.navigateByUrl(returnUrl);
+            return;
+          }
+
+          switch (response.role) {
+            case 'ROLE_ADMIN':
+              this.router.navigateByUrl('/admin');
+              break;
+
+            case 'ROLE_LIBRARIAN':
+              this.router.navigateByUrl('/dashboard');
+              break;
+
+            case 'ROLE_USER':
+            default:
+              this.router.navigateByUrl('/dashboard');
+              break;
+          }
+        },
       error: (err) => {
         this.loading.set(false);
         if (err.status === 401 || err.status === 403) {
