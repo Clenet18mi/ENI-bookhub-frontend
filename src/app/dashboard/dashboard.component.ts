@@ -55,6 +55,12 @@ export class DashboardComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    if (!this.isAdmin()) {
+      this.loading.set(false);
+      return;
+    }
+
+    this.loadAdminDashboard();
     this.dashService.loadDashboardStats().subscribe({
       next: () => this.loading.set(false),
       error: () => this.loading.set(false),
@@ -66,7 +72,16 @@ export class DashboardComponent implements OnInit {
   }
 
   reload(): void {
+    if (!this.isAdmin()) {
+      return;
+    }
+
+    this.loadAdminDashboard();
+  }
+
+  private loadAdminDashboard(): void {
     this.loading.set(true);
+
     this.dashService.loadDashboardStats().subscribe({
       next: () => this.loading.set(false),
       error: () => this.loading.set(false),
