@@ -16,6 +16,10 @@ export interface AdminUser {
   active: boolean;
   createdAt: string;
   updatedAt: string | null;
+  /** Présent uniquement après une désactivation avec réservations annulées. */
+  hadActiveReservations?: boolean;
+  /** Présent uniquement après une suppression RGPD avec emprunts en cours. */
+  hadActiveLoans?: boolean;
 }
 
 export interface AdminStats {
@@ -108,9 +112,16 @@ export class AdminService {
     return this.http.get<{ hasActive: boolean }>(`admin/users/${userId}/has-active-reservations`);
   }
 
-  /** Supprime définitivement un compte utilisateur (admin only). */
-  deleteUser(userId: number): Observable<{ hadActiveLoans: boolean }> {
-    return this.http.delete<{ hadActiveLoans: boolean }>(`admin/users/${userId}`);
+  /**
+   * Anonymise (RGPD) un compte utilisateur (admin only).
+   * Retourne l'utilisateur anonymisé avec `hadActiveLoans` si des emprunts
+   * non rendus existaient (avertissement).
+   * La ligne n'est PAS supprimée — elle est mise à jour avec des données neutres.
+   */
+  deleteUser(userId: number): Observable<AdminUser> {
+    return this.http.delete<AdminUser>(`admin/users/${userId}`).pipe(
+      tap((anonymized) => this.replaceInCache(anonymized))
+    );
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────

@@ -1,0 +1,171 @@
+<!-- Chargement initial -->
+    <div *ngIf="loading()" class="loading-center">
+      <mat-spinner diameter="48"></mat-spinner>
+    </div>
+
+    <!-- Erreur de chargement -->
+    <div *ngIf="!loading() && loadError()" class="error-banner">
+      <mat-icon>error_outline</mat-icon>
+      <span>Impossible de charger le profil. Vérifiez votre connexion.</span>
+    </div>
+
+    <!-- Page profil -->
+    <section class="profile-page" *ngIf="!loading() && profile()">
+      <!-- En-tête -->
+      <header class="profile-hero">
+        <div>
+          <p class="eyebrow">Mon profil</p>
+          <h1>Vos informations et votre compte</h1>
+          <p class="lead">Modifiez vos coordonnées et votre mot de passe.</p>
+        </div>
+
+        <div class="quick-card">
+          <div class="avatar">{{ initiale(profile()!) }}</div>
+          <div>
+            <strong>{{ profile()!.firstName }} {{ profile()!.lastName }}</strong>
+            <p>{{ formatRole(profile()!.role) }}</p>
+            <p class="member-since">Membre depuis {{ profile()!.createdAt | date:'MMMM yyyy' : '' : 'fr' }}</p>
+          </div>
+        </div>
+      </header>
+
+      <div class="profile-grid">
+        <!-- Coordonnées -->
+        <mat-card class="main-card">
+          <mat-card-header>
+            <mat-card-title>Coordonnées</mat-card-title>
+            <mat-card-subtitle>Mettez à jour vos informations de contact</mat-card-subtitle>
+          </mat-card-header>
+
+          <mat-card-content class="form-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>Prénom</mat-label>
+              <input matInput [formControl]="profileForm.controls.firstName" />
+              <mat-error *ngIf="profileForm.controls.firstName.hasError('required')">
+                Champ requis
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Nom</mat-label>
+              <input matInput [formControl]="profileForm.controls.lastName" />
+              <mat-error *ngIf="profileForm.controls.lastName.hasError('required')">
+                Champ requis
+              </mat-error>
+            </mat-form-field>
+
+            <!-- Email en lecture seule -->
+            <mat-form-field appearance="outline" class="full">
+              <mat-label>Email</mat-label>
+              <input matInput [value]="profile()!.email" readonly />
+              <mat-icon matSuffix>lock</mat-icon>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full">
+              <mat-label>Téléphone</mat-label>
+              <input matInput [formControl]="profileForm.controls.phone" placeholder="06 12 34 56 78" />
+            </mat-form-field>
+          </mat-card-content>
+
+          <mat-card-actions>
+            <button
+              mat-flat-button
+              color="primary"
+              [disabled]="profileForm.invalid || savingProfile()"
+              (click)="onUpdateProfile()">
+              <mat-icon>save</mat-icon>
+              {{ savingProfile() ? 'Enregistrement…' : 'Enregistrer' }}
+            </button>
+          </mat-card-actions>
+        </mat-card>
+
+        <!-- Colonne droite -->
+        <div class="side-stack">
+          <!-- Sécurité -->
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title>Sécurité</mat-card-title>
+              <mat-card-subtitle>Changez votre mot de passe</mat-card-subtitle>
+            </mat-card-header>
+
+            <mat-card-content>
+              <div *ngIf="!showPasswordForm()" class="password-intro">
+                <p>Votre mot de passe est sécurisé et chiffré.</p>
+                <button mat-stroked-button (click)="showPasswordForm.set(true)">
+                  <mat-icon>lock_reset</mat-icon>
+                  Changer le mot de passe
+                </button>
+              </div>
+
+              <div *ngIf="showPasswordForm()">
+                <mat-form-field appearance="outline" class="full-field">
+                  <mat-label>Mot de passe actuel</mat-label>
+                  <input matInput type="password" [formControl]="passwordForm.controls.currentPassword" />
+                  <mat-error *ngIf="passwordForm.controls.currentPassword.hasError('required')">
+                    Champ requis
+                  </mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-field">
+                  <mat-label>Nouveau mot de passe</mat-label>
+                  <input matInput type="password" [formControl]="passwordForm.controls.newPassword" />
+                  <mat-error *ngIf="passwordForm.controls.newPassword.hasError('minlength')">
+                    8 caractères minimum
+                  </mat-error>
+                </mat-form-field>
+
+                <div class="password-actions">
+                  <button mat-button (click)="showPasswordForm.set(false); passwordForm.reset()">
+                    Annuler
+                  </button>
+                  <button
+                    mat-flat-button
+                    color="primary"
+                    [disabled]="passwordForm.invalid || savingPassword()"
+                    (click)="onChangePassword()">
+                    {{ savingPassword() ? 'Modification…' : 'Confirmer' }}
+                  </button>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Infos compte -->
+          <mat-card class="account-info-card">
+            <mat-card-header>
+              <mat-card-title>Informations compte</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <p><strong>Rôle :</strong> {{ formatRole(profile()!.role) }}</p>
+              <p><strong>Inscrit le :</strong> {{ profile()!.createdAt | date:'dd/MM/yyyy' }}</p>
+              <p *ngIf="profile()!.updatedAt">
+                <strong>Dernière mise à jour :</strong> {{ profile()!.updatedAt | date:'dd/MM/yyyy' }}
+              </p>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Zone danger : suppression de compte -->
+          <mat-card class="danger-zone-card">
+            <mat-card-header>
+              <mat-icon class="danger-icon">warning</mat-icon>
+              <mat-card-title>Zone de danger</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <p class="danger-desc">
+                La suppression de votre compte est irréversible. Toutes vos données seront anonymisées.
+              </p>
+              <p class="danger-desc warn-reservations" *ngIf="deletionBlocked()">
+                <mat-icon>block</mat-icon>
+                Vous avez des emprunts ou réservations en cours. Retournez vos livres et annulez vos réservations avant de supprimer votre compte.
+              </p>
+            </mat-card-content>
+            <mat-card-actions>
+              <button mat-stroked-button color="warn" (click)="onDeleteAccount()" [disabled]="deletingAccount()">
+                <mat-icon>delete_forever</mat-icon>
+                Supprimer mon compte
+              </button>
+            </mat-card-actions>
+          </mat-card>
+        </div>
+      </div>
+    </section>
