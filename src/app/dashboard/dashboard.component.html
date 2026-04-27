@@ -247,7 +247,6 @@
           <th mat-header-cell *matHeaderCellDef> Lecteur à contacter </th>
           <td mat-cell *matCellDef="let loan">
             <div class="user-info">
-              <span>{{ loan.userFullName }}</span>
               <a [href]="'mailto:' + loan.userEmail" class="email-link">{{ loan.userEmail }}</a>
             </div>
           </td>
@@ -265,8 +264,8 @@
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef> Actions </th>
           <td mat-cell *matCellDef="let loan">
-            <button mat-flat-button color="warn" (click)="markAsReturned(loan.id)">
-              Encaisser retour
+            <button mat-flat-button color="warn" (click)="markAsReturned(loan)">
+              Retourner
             </button>
           </td>
         </ng-container>
@@ -341,8 +340,8 @@
           <th mat-header-cell *matHeaderCellDef> Actions </th>
           <td mat-cell *matCellDef="let loan">
             @if (loan.status !== 'RETURNED') {
-            <button mat-icon-button color="primary" (click)="markAsReturned(loan.id)" matTooltip="Valider le retour">
-              <mat-icon>task_alt</mat-icon>
+            <button mat-flat-button color="primary" (click)="markAsReturned(loan)">
+              Retourner
             </button>
             }
           </td>

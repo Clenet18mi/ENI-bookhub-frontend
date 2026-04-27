@@ -29,11 +29,6 @@ export type DashboardReservation = {
 @Injectable({ providedIn: 'root' })
 export class DashboardService {
 
-  private readonly http = inject(HttpClient);
-
-  getAllLoans(): Observable<LoanResponse[]> {
-    return this.http.get<LoanResponse[]>("loans/all");
-  }
 
   getStats(): DashboardStat[] {
     return [
