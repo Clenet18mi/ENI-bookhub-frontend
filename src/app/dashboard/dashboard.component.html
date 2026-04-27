@@ -1,11 +1,373 @@
+@if (isAdmin()) {
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<!-- DASHBOARD ADMINISTRATEUR                                             -->
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<div class="admin-dashboard">
+  <header class="dash-header">
+    <div>
+      <h1>Tableau de bord</h1>
+      <p class="dash-subtitle">Vue d'ensemble de la bibliothèque — {{ today }}</p>
+    </div>
+    <button mat-stroked-button (click)="reload()">
+      <mat-icon>refresh</mat-icon>
+      Actualiser
+    </button>
+  </header>
+
+  @if (loading()) {
+  <div class="loading-overlay">
+    <mat-spinner diameter="48" />
+    <p>Chargement des statistiques…</p>
+  </div>
+  } @else if (s(); as stats) {
+
+  <!-- KPIs principaux -->
+  <section class="kpi-grid">
+    <div class="kpi-card forest">
+      <div class="kpi-icon-wrap"><mat-icon>group</mat-icon></div>
+      <div class="kpi-body">
+        <span class="kpi-value">{{ stats.totalUsers }}</span>
+        <span class="kpi-label">Adhérents</span>
+        <span class="kpi-sub">{{ stats.activeUsers }} actifs · {{ stats.inactiveUsers }} inactifs</span>
+      </div>
+    </div>
+    <div class="kpi-card indigo">
+      <div class="kpi-icon-wrap"><mat-icon>auto_stories</mat-icon></div>
+      <div class="kpi-body">
+        <span class="kpi-value">{{ stats.totalBooks }}</span>
+        <span class="kpi-label">Livres au catalogue</span>
+        <span class="kpi-sub">{{ stats.availableBooks }} disponibles</span>
+      </div>
+    </div>
+    <div class="kpi-card amber">
+      <div class="kpi-icon-wrap"><mat-icon>calendar_month</mat-icon></div>
+      <div class="kpi-body">
+        <span class="kpi-value">{{ stats.activeLoans }}</span>
+        <span class="kpi-label">Emprunts actifs</span>
+        <span class="kpi-sub">{{ stats.returnedThisMonth }} retours ce mois</span>
+      </div>
+    </div>
+    <div class="kpi-card" [class.rose]="stats.overdueLoans > 0" [class.slate]="stats.overdueLoans === 0">
+      <div class="kpi-icon-wrap"><mat-icon>warning_amber</mat-icon></div>
+      <div class="kpi-body">
+        <span class="kpi-value">{{ stats.overdueLoans }}</span>
+        <span class="kpi-label">Retards en cours</span>
+        <span class="kpi-sub">{{ stats.pendingReservations }} réservations en attente</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Ligne 2 : Graphique + Répartition rôles -->
+  <div class="row-two">
+    <div class="chart-card">
+      <div class="card-header">
+        <h2>Emprunts & retours</h2>
+        <span class="card-subtitle">6 derniers mois</span>
+      </div>
+      <div class="bar-chart">
+        @for (m of stats.loansByMonth; track m.month) {
+        <div class="month-group">
+          <div class="bars">
+            <div class="bar loans-bar" [style.height.px]="barHeight(m.loans, stats.loansByMonth)"
+              [matTooltip]="m.loans + ' emprunts'">
+              <span class="bar-val">{{ m.loans }}</span>
+            </div>
+            <div class="bar returns-bar" [style.height.px]="barHeight(m.returns, stats.loansByMonth)"
+              [matTooltip]="m.returns + ' retours'">
+              <span class="bar-val">{{ m.returns }}</span>
+            </div>
+          </div>
+          <span class="month-label">{{ m.month }}</span>
+        </div>
+        }
+      </div>
+      <div class="chart-legend">
+        <span class="legend-dot loans-dot"></span><span>Emprunts</span>
+        <span class="legend-dot returns-dot"></span><span>Retours</span>
+      </div>
+    </div>
+
+    <div class="roles-card">
+      <div class="card-header">
+        <h2>Répartition des rôles</h2>
+      </div>
+      <div class="donut-wrap">
+        <svg class="donut" viewBox="0 0 120 120">
+          @for (seg of donutSegments(stats.usersByRole); track seg.role) {
+          <circle class="donut-ring" cx="60" cy="60" r="45" [style.stroke]="seg.color"
+            [style.stroke-dasharray]="seg.dash" [style.stroke-dashoffset]="seg.offset"
+            [matTooltip]="seg.role + ' : ' + seg.count" />
+          }
+          <text x="60" y="56" class="donut-center-val" text-anchor="middle">{{ stats.totalUsers }}</text>
+          <text x="60" y="70" class="donut-center-label" text-anchor="middle">total</text>
+        </svg>
+        <div class="donut-legend">
+          @for (seg of donutSegments(stats.usersByRole); track seg.role) {
+          <div class="donut-leg-item">
+            <span class="donut-dot" [style.background]="seg.color"></span>
+            <span class="leg-role">{{ seg.role }}</span>
+            <strong class="leg-count">{{ seg.count }}</strong>
+          </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ligne 3 : Top livres + Activité -->
+  <div class="row-three">
+    <div class="topbooks-card">
+      <div class="card-header">
+        <h2>Top 5 livres</h2>
+        <a mat-button routerLink="/catalogue" class="see-all">Voir le catalogue →</a>
+      </div>
+      <div class="topbooks-list">
+        @for (book of stats.topBooks; track book.title; let i = $index) {
+        <div class="topbook-row">
+          <span class="book-rank" [class.top3]="i < 3">#{{ i + 1 }}</span>
+          <div class="book-info">
+            <strong class="book-title">{{ book.title }}</strong>
+            <span class="book-author">{{ book.author }}</span>
+          </div>
+          <div class="book-bar-wrap">
+            <div class="book-bar" [style.width.%]="(book.loanCount / stats.topBooks[0].loanCount) * 100"></div>
+          </div>
+          <span class="book-count">{{ book.loanCount }}<small> emprunts</small></span>
+        </div>
+        }
+      </div>
+    </div>
+
+    <div class="activity-card">
+      <div class="card-header">
+        <h2>Activité récente</h2>
+      </div>
+      <div class="activity-feed">
+        @for (item of stats.recentActivity; track item.date + item.userName) {
+        <div class="activity-item">
+          <div class="activity-icon" [class]="'act-' + item.type">
+            <mat-icon>{{ activityIcon(item.type) }}</mat-icon>
+          </div>
+          <div class="activity-text">
+            <strong>{{ item.userName }}</strong>
+            <span>{{ activityLabel(item.type, item.bookTitle) }}</span>
+          </div>
+          <span class="activity-date">{{ item.date | date:'dd/MM' }}</span>
+        </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Disponibilité -->
+  <section class="availability-section">
+    <div class="card-header">
+      <h2>Disponibilité du fonds</h2>
+    </div>
+    <div class="avail-bars">
+      <div class="avail-item">
+        <span class="avail-label">Livres disponibles</span>
+        <div class="avail-track">
+          <div class="avail-fill green" [style.width.%]="(stats.availableBooks / stats.totalBooks) * 100"></div>
+        </div>
+        <span class="avail-pct">{{ ((stats.availableBooks / stats.totalBooks) * 100) | number:'1.0-0' }}%</span>
+      </div>
+      <div class="avail-item">
+        <span class="avail-label">Emprunts actifs</span>
+        <div class="avail-track">
+          <div class="avail-fill amber" [style.width.%]="(stats.activeLoans / stats.totalBooks) * 100"></div>
+        </div>
+        <span class="avail-pct">{{ stats.activeLoans }} livres</span>
+      </div>
+      <div class="avail-item">
+        <span class="avail-label">En retard</span>
+        <div class="avail-track">
+          <div class="avail-fill rose"
+            [style.width.%]="stats.activeLoans > 0 ? (stats.overdueLoans / stats.activeLoans) * 100 : 0"></div>
+        </div>
+        <span class="avail-pct">{{ stats.activeLoans > 0 ? ((stats.overdueLoans / stats.activeLoans) * 100 |
+          number:'1.0-0') : 0 }}%</span>
+      </div>
+      <div class="avail-item">
+        <span class="avail-label">Taux d'utilisation</span>
+        <div class="avail-track">
+          <div class="avail-fill forest"
+            [style.width.%]="((stats.totalBooks - stats.availableBooks) / stats.totalBooks) * 100"></div>
+        </div>
+        <span class="avail-pct">{{ (((stats.totalBooks - stats.availableBooks) / stats.totalBooks) * 100) |
+          number:'1.0-0' }}%</span>
+      </div>
+    </div>
+  </section>
+  }
+</div>
+
+} @else if(isLibrarian()) {
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<!-- DASHBOARD LIBRAIRE                                 -->
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<section class="dashboard librarian-view">
+  <header class="dashboard-hero">
+    <div>
+      <p class="eyebrow">Espace Professionnel</p>
+      <h1>Gestion des Emprunts</h1>
+      <p class="lead">Suivi des prêts, retours et relances des lecteurs.</p>
+    </div>
+    <div class="hero-actions">
+      <button mat-flat-button color="accent" (click)="exportLoans()">
+        <mat-icon>download</mat-icon> Export CSV
+      </button>
+    </div>
+  </header>
+
+  @if (overdueCount() > 0) {
+  <mat-card class="panel overdue-panel">
+    <div class="panel-head">
+      <div>
+        <p class="section-title urgent-title">
+          <mat-icon color="warn">warning</mat-icon>
+          Retards à traiter
+        </p>
+        <span class="section-subtitle">Ces lecteurs doivent être relancés immédiatement</span>
+      </div>
+      <mat-chip-set>
+        <mat-chip class="warn-chip">{{ overdueCount() }} retards</mat-chip>
+      </mat-chip-set>
+    </div>
+
+    <div class="table-container">
+      <table mat-table [dataSource]="overdueLoans()" class="all-loans-table overdue-theme">
+
+        <ng-container matColumnDef="bookTitle">
+          <th mat-header-cell *matHeaderCellDef> Livre </th>
+          <td mat-cell *matCellDef="let loan"><strong>{{ loan.bookTitle }}</strong></td>
+        </ng-container>
+
+        <ng-container matColumnDef="borrower">
+          <th mat-header-cell *matHeaderCellDef> Lecteur à contacter </th>
+          <td mat-cell *matCellDef="let loan">
+            <div class="user-info">
+              <span>{{ loan.userFullName }}</span>
+              <a [href]="'mailto:' + loan.userEmail" class="email-link">{{ loan.userEmail }}</a>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="delay">
+          <th mat-header-cell *matHeaderCellDef> Temps de retard </th>
+          <td mat-cell *matCellDef="let loan">
+            <span class="late-text">
+              Depuis {{ -calculateDaysRemaining(loan.dueDate) }} jours
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef> Actions </th>
+          <td mat-cell *matCellDef="let loan">
+            <button mat-flat-button color="warn" (click)="markAsReturned(loan.id)">
+              Encaisser retour
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="['bookTitle', 'borrower', 'delay', 'actions']"></tr>
+        <tr mat-row *matRowDef="let row; columns: ['bookTitle', 'borrower', 'delay', 'actions'];"></tr>
+      </table>
+    </div>
+  </mat-card>
+  }
+
+  <mat-card class="panel full-width">
+    <div class="table-container">
+      <table mat-table [dataSource]="allLoans()" class="all-loans-table">
+
+        <ng-container matColumnDef="bookTitle">
+          <th mat-header-cell *matHeaderCellDef> Livre </th>
+          <td mat-cell *matCellDef="let loan">
+            <div class="book-info">
+              <span class="title-text">{{ loan.bookTitle }}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="borrower">
+          <th mat-header-cell *matHeaderCellDef> Emprunteur </th>
+          <td mat-cell *matCellDef="let loan">
+            <div class="user-info">
+              <span class="email-sub">{{ loan.userEmail }}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef> Statut </th>
+          <td mat-cell *matCellDef="let loan">
+            <span class="status-pill" [attr.data-status]="loan.status">
+              {{ loan.status }}
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="loanDate">
+          <th mat-header-cell *matHeaderCellDef> Date d'emprunt </th>
+          <td mat-cell *matCellDef="let loan">
+            {{ loan.loanDate | date:'dd/MM/yyyy' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="dueDate">
+          <th mat-header-cell *matHeaderCellDef> Date de retour </th>
+          <td mat-cell *matCellDef="let loan">
+            <div [class.overdue-text]="loan.status === 'OVERDUE'">
+              {{ loan.dueDate | date:'dd/MM/yyyy' }}
+              @if (loan.status === 'OVERDUE') {
+              <mat-icon inline class="warn-icon">priority_high</mat-icon>
+              }
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="duration">
+          <th mat-header-cell *matHeaderCellDef> Durée restante </th>
+          <td mat-cell *matCellDef="let loan">
+            <span class="duration-badge">
+              {{ calculateDaysRemaining(loan.dueDate) }} jours
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef> Actions </th>
+          <td mat-cell *matCellDef="let loan">
+            @if (loan.status !== 'RETURNED') {
+            <button mat-icon-button color="primary" (click)="markAsReturned(loan.id)" matTooltip="Valider le retour">
+              <mat-icon>task_alt</mat-icon>
+            </button>
+            }
+          </td>
+        </ng-container>
+
+        <tr mat-header-row
+          *matHeaderRowDef="['bookTitle', 'borrower', 'status', 'loanDate', 'dueDate', 'duration', 'actions']"></tr>
+        <tr mat-row
+          *matRowDef="let row; columns: ['bookTitle', 'borrower', 'status', 'loanDate', 'dueDate', 'duration', 'actions'];">
+        </tr>
+      </table>
+    </div>
+  </mat-card>
+</section>
+} @else {
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<!-- DASHBOARD LECTEUR                                 -->
+<!-- ════════════════════════════════════════════════════════════════════ -->
 <section class="dashboard">
   <header class="dashboard-hero">
     <div>
       <p class="eyebrow">Tableau de bord lecteur</p>
-      <h1>Bonjour, Marie.</h1>
-      <p class="lead">Suivez vos emprunts, réservations et alertes dans une vue claire, rapide et responsive.</p>
+      <h1>Bonjour, {{ userName() }}.</h1>
+      <p class="lead">Suivez vos emprunts, réservations et alertes dans une vue claire.</p>
     </div>
-
     <div class="hero-actions">
       <a mat-flat-button color="primary" routerLink="/catalogue">
         <mat-icon>search</mat-icon>
@@ -20,14 +382,14 @@
 
   <section class="stats-grid" aria-label="Indicateurs principaux">
     @for (stat of stats; track stat.label) {
-      <mat-card class="stat-card" [class]="'tone-' + stat.tone">
-        <div class="stat-icon"><mat-icon>{{ stat.icon }}</mat-icon></div>
-        <div>
-          <p>{{ stat.label }}</p>
-          <strong>{{ stat.value }}</strong>
-          <span>{{ stat.hint }}</span>
-        </div>
-      </mat-card>
+    <mat-card class="stat-card" [class]="'tone-' + stat.tone">
+      <div class="stat-icon"><mat-icon>{{ stat.icon }}</mat-icon></div>
+      <div>
+        <p>{{ stat.label }}</p>
+        <strong>{{ stat.value }}</strong>
+        <span>{{ stat.hint }}</span>
+      </div>
+    </mat-card>
     }
   </section>
 
@@ -40,26 +402,20 @@
         </div>
         <a mat-button color="primary" routerLink="/loans">Voir tout</a>
       </div>
-
       <div class="loan-list">
         @for (loan of recentLoans; track loan.title) {
-          <article class="loan-item">
-            <div class="book-cover" aria-hidden="true">
-              <mat-icon>auto_stories</mat-icon>
+        <article class="loan-item">
+          <div class="book-cover" aria-hidden="true"><mat-icon>auto_stories</mat-icon></div>
+          <div class="loan-copy">
+            <h3>{{ loan.title }}</h3>
+            <p>{{ loan.author }}</p>
+            <div class="loan-meta">
+              <span>Retour prévu : {{ loan.due }}</span>
+              <span [class.late]="loan.statusTone === 'late'">{{ loan.status }}</span>
             </div>
-
-            <div class="loan-copy">
-              <h3>{{ loan.title }}</h3>
-              <p>{{ loan.author }}</p>
-              <div class="loan-meta">
-                <span>Retour prévu : {{ loan.due }}</span>
-                <span [class.late]="loan.statusTone === 'late'">{{ loan.status }}</span>
-              </div>
-            </div>
-          </article>
-          @if (!$last) {
-            <mat-divider></mat-divider>
-          }
+          </div>
+        </article>
+        @if (!$last) { <mat-divider></mat-divider> }
         }
       </div>
     </mat-card>
@@ -71,26 +427,25 @@
           <span class="section-subtitle">Votre file d'attente en temps réel</span>
         </div>
       </div>
-
       <div class="reservation-list">
         @for (reservation of reservations; track reservation.title) {
-          <article class="reservation-item">
-            <div>
-              <h3>{{ reservation.title }}</h3>
-              <p>{{ reservation.author }}</p>
+        <article class="reservation-item">
+          <div>
+            <h3>{{ reservation.title }}</h3>
+            <p>{{ reservation.author }}</p>
+          </div>
+          <div class="reservation-footer">
+            <strong>{{ reservation.availability }}</strong>
+            <div class="chip-row">
+              @for (chip of reservation.chips; track chip) {
+              <mat-chip>{{ chip }}</mat-chip>
+              }
             </div>
-
-            <div class="reservation-footer">
-              <strong>{{ reservation.availability }}</strong>
-              <div class="chip-row">
-                @for (chip of reservation.chips; track chip) {
-                  <mat-chip>{{ chip }}</mat-chip>
-                }
-              </div>
-            </div>
-          </article>
+          </div>
+        </article>
         }
       </div>
     </mat-card>
   </section>
 </section>
+}

@@ -1,4 +1,7 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { LoanResponse } from '../models/loan-response.model';
+import { HttpClient } from '@angular/common/http';
 
 export type DashboardStat = {
   label: string;
@@ -25,6 +28,13 @@ export type DashboardReservation = {
 
 @Injectable({ providedIn: 'root' })
 export class DashboardService {
+
+  private readonly http = inject(HttpClient);
+
+  getAllLoans(): Observable<LoanResponse[]> {
+    return this.http.get<LoanResponse[]>("loans/all");
+  }
+
   getStats(): DashboardStat[] {
     return [
       { label: 'Emprunts en cours', value: '3', hint: 'livres empruntés', icon: 'menu_book', tone: 'forest' },
