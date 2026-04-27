@@ -1,0 +1,374 @@
+<div class="admin-root">
+
+      <!-- ═══ VUE LISTE ═══════════════════════════════════════════════════════ -->
+      <div class="list-pane" [class.hidden-mobile]="selectedUser()">
+
+        <!-- En-tête -->
+        <header class="page-header">
+          <div class="header-left">
+            <div class="header-badge">
+              <mat-icon>admin_panel_settings</mat-icon>
+            </div>
+            <div>
+              <h1>Administration</h1>
+              <p>Gestion des utilisateurs et pilotage de la plateforme</p>
+            </div>
+          </div>
+          <button mat-stroked-button (click)="reload()" [disabled]="loading()">
+            <mat-icon>refresh</mat-icon>
+            Actualiser
+          </button>
+        </header>
+
+        <!-- Stats rapides -->
+        @if (stats(); as s) {
+          <section class="stats-grid">
+            <div class="stat-card">
+              <mat-icon class="stat-icon users">group</mat-icon>
+              <div class="stat-body">
+                <span class="stat-value">{{ s.totalUsers }}</span>
+                <span class="stat-label">Utilisateurs</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <mat-icon class="stat-icon active">how_to_reg</mat-icon>
+              <div class="stat-body">
+                <span class="stat-value">{{ s.activeUsers }}</span>
+                <span class="stat-label">Comptes actifs</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <mat-icon class="stat-icon books">menu_book</mat-icon>
+              <div class="stat-body">
+                <span class="stat-value">{{ s.totalBooks }}</span>
+                <span class="stat-label">Livres</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <mat-icon class="stat-icon loans">calendar_month</mat-icon>
+              <div class="stat-body">
+                <span class="stat-value">{{ s.activeLoans }}</span>
+                <span class="stat-label">Emprunts actifs</span>
+              </div>
+            </div>
+            <div class="stat-card" [class.alert]="s.overdueLoans > 0">
+              <mat-icon class="stat-icon overdue">warning</mat-icon>
+              <div class="stat-body">
+                <span class="stat-value">{{ s.overdueLoans }}</span>
+                <span class="stat-label">Retards</span>
+              </div>
+            </div>
+          </section>
+        }
+
+        <!-- Section utilisateurs -->
+        <section class="users-section">
+          <div class="section-header">
+            <h2>Utilisateurs</h2>
+            <div class="search-row">
+              <mat-form-field appearance="outline" class="search-field">
+                <mat-label>Rechercher…</mat-label>
+                <mat-icon matPrefix>search</mat-icon>
+                <input matInput [(ngModel)]="searchQuery" placeholder="Nom, prénom, email, rôle…" />
+                @if (searchQuery) {
+                  <button matSuffix mat-icon-button (click)="searchQuery = ''" aria-label="Effacer">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                }
+              </mat-form-field>
+              <div class="role-filters">
+                @for (f of roleFilters; track f.value) {
+                  <button
+                    class="filter-chip"
+                    [class.active]="activeRoleFilter() === f.value"
+                    (click)="setRoleFilter(f.value)">
+                    {{ f.label }}
+                  </button>
+                }
+              </div>
+            </div>
+          </div>
+
+          @if (loading()) {
+            <div class="loading-state">
+              <mat-spinner diameter="40" />
+              <p>Chargement en cours…</p>
+            </div>
+          } @else if (error()) {
+            <div class="error-state">
+              <mat-icon>error_outline</mat-icon>
+              <p>{{ error() }}</p>
+              <button mat-flat-button color="primary" (click)="reload()">Réessayer</button>
+            </div>
+          } @else {
+            <div class="users-list">
+              @for (u of filteredUsers(); track u.id) {
+                <div
+                  class="user-row"
+                  [class.selected]="selectedUser()?.id === u.id"
+                  [class.inactive-row]="!u.active"
+                  (click)="openDetail(u)">
+
+                  <div class="user-avatar" [class]="getRoleClass(u.role)">
+                    {{ initials(u) }}
+                  </div>
+
+                  <div class="user-info">
+                    <strong>{{ u.firstName }} {{ u.lastName }}</strong>
+                    <span class="user-email">{{ u.email }}</span>
+                    <span class="user-phone">{{ u.phone ?? '—' }}</span>
+                  </div>
+
+                  <div class="user-meta">
+                    <span class="role-badge" [class]="getRoleClass(u.role)">{{ roleLabel(u.role) }}</span>
+                    <span class="status-badge" [class.active]="u.active" [class.inactive]="!u.active">
+                      <mat-icon>{{ u.active ? 'check_circle' : 'cancel' }}</mat-icon>
+                      {{ u.active ? 'Actif' : 'Inactif' }}
+                    </span>
+                  </div>
+
+                  <div class="user-date">
+                    <span class="date-label">Inscrit le</span>
+                    <span>{{ u.createdAt | date:'dd/MM/yyyy' }}</span>
+                  </div>
+
+                  <mat-icon class="chevron">chevron_right</mat-icon>
+                </div>
+              }
+
+              @if (filteredUsers().length === 0) {
+                <div class="empty-state">
+                  <mat-icon>search_off</mat-icon>
+                  <p>Aucun utilisateur ne correspond à votre recherche.</p>
+                </div>
+              }
+            </div>
+
+            <p class="table-footer">
+              {{ filteredUsers().length }} utilisateur{{ filteredUsers().length > 1 ? 's' : '' }}
+              sur {{ adminService.users().length }} au total
+            </p>
+          }
+        </section>
+      </div>
+
+      <!-- ═══ PANNEAU DÉTAIL ═══════════════════════════════════════════════════ -->
+      @if (selectedUser(); as user) {
+        <aside class="detail-pane">
+
+          <!-- Header panneau -->
+          <div class="detail-header">
+            <button mat-icon-button class="back-btn" (click)="closeDetail()" matTooltip="Retour à la liste">
+              <mat-icon>arrow_back</mat-icon>
+            </button>
+
+            <div class="detail-avatar" [class]="getRoleClass(user.role)">
+              {{ initials(user) }}
+            </div>
+
+            <div class="detail-title">
+              <h2>{{ user.firstName }} {{ user.lastName }}</h2>
+              <span class="role-badge" [class]="getRoleClass(user.role)">{{ roleLabel(user.role) }}</span>
+              <span class="status-badge" [class.active]="user.active" [class.inactive]="!user.active">
+                <mat-icon>{{ user.active ? 'check_circle' : 'cancel' }}</mat-icon>
+                {{ user.active ? 'Actif' : 'Inactif' }}
+              </span>
+            </div>
+          </div>
+
+          <mat-divider />
+
+          <!-- Infos personnelles -->
+          <section class="detail-section">
+            <h3 class="section-title"><mat-icon>person</mat-icon> Informations</h3>
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="info-label">Email</span>
+                <span class="info-value">{{ user.email }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Téléphone</span>
+                <span class="info-value">{{ user.phone ?? '—' }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Inscrit le</span>
+                <span class="info-value">{{ user.createdAt | date:'dd MMMM yyyy':'':'fr' }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Dernière modification</span>
+                <span class="info-value">{{ user.updatedAt ? (user.updatedAt | date:'dd/MM/yyyy') : '—' }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">ID utilisateur</span>
+                <span class="info-value mono">#{{ user.id }}</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Actions rapides -->
+          <section class="detail-section">
+            <h3 class="section-title"><mat-icon>settings</mat-icon> Actions</h3>
+            <div class="actions-row">
+              <mat-form-field appearance="outline" class="role-select-field">
+                <mat-label>Rôle</mat-label>
+                <mat-select
+                  [value]="user.role"
+                  (selectionChange)="onRoleChange(user, $event.value)"
+                  [disabled]="user.id === currentUserId">
+                  <mat-option value="ROLE_USER">Lecteur</mat-option>
+                  <mat-option value="ROLE_LIBRARIAN">Bibliothécaire</mat-option>
+                  <mat-option value="ROLE_ADMIN">Administrateur</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              @if (user.active) {
+                <button
+                  mat-stroked-button
+                  color="warn"
+                  [disabled]="user.id === currentUserId"
+                  (click)="toggleActive(user, false)">
+                  <mat-icon>block</mat-icon>
+                  Désactiver
+                </button>
+              } @else {
+                <button mat-flat-button color="primary" (click)="toggleActive(user, true)">
+                  <mat-icon>check_circle</mat-icon>
+                  Activer
+                </button>
+              }
+              <button
+                mat-stroked-button
+                color="warn"
+                class="delete-account-btn"
+                [disabled]="user.id === currentUserId"
+                (click)="deleteUserAccount(user)">
+                <mat-icon>manage_accounts</mat-icon>
+                Anonymiser (RGPD)
+              </button>
+            </div>
+          </section>
+
+          <mat-divider />
+
+          <!-- Onglets Emprunts / Réservations -->
+          <mat-tab-group class="detail-tabs" animationDuration="200ms">
+
+            <!-- Emprunts -->
+            <mat-tab>
+              <ng-template mat-tab-label>
+                <mat-icon class="tab-icon">menu_book</mat-icon>
+                Emprunts
+                @if (userLoans().length > 0) {
+                  <span class="tab-count">{{ userLoans().length }}</span>
+                }
+              </ng-template>
+
+              <div class="tab-content">
+                @if (loansLoading()) {
+                  <div class="loading-state small"><mat-spinner diameter="28" /></div>
+                } @else if (loansError()) {
+                  <div class="error-inline">
+                    <mat-icon>error_outline</mat-icon>
+                    <span>{{ loansError() }}</span>
+                    <button mat-button (click)="loadUserLoans(user)">Réessayer</button>
+                  </div>
+                } @else if (userLoans().length === 0) {
+                  <div class="empty-inline">
+                    <mat-icon>inbox</mat-icon>
+                    <p>Aucun emprunt enregistré.</p>
+                  </div>
+                } @else {
+                  <div class="loan-list">
+                    @for (loan of userLoans(); track loan.id) {
+                      <div class="loan-card" [class.overdue]="loan.status === 'OVERDUE'">
+                        <div class="loan-status-bar" [class]="'bar-' + loan.status.toLowerCase()"></div>
+                        <div class="loan-info">
+                          <strong class="loan-title">{{ loan.bookTitle }}</strong>
+                          <span class="loan-author">{{ loan.bookAuthor }}</span>
+                          @if (loan.bookIsbn) {
+                            <span class="loan-isbn">ISBN : {{ loan.bookIsbn }}</span>
+                          }
+                        </div>
+                        <div class="loan-dates">
+                          <div class="date-pair">
+                            <span class="info-label">Emprunté</span>
+                            <span>{{ loan.loanDate | date:'dd/MM/yy' }}</span>
+                          </div>
+                          <div class="date-pair">
+                            <span class="info-label">Retour prévu</span>
+                            <span [class.overdue-text]="loan.status === 'OVERDUE'">{{ loan.dueDate | date:'dd/MM/yy' }}</span>
+                          </div>
+                          @if (loan.returnDate) {
+                            <div class="date-pair">
+                              <span class="info-label">Retourné le</span>
+                              <span class="returned-text">{{ loan.returnDate | date:'dd/MM/yy' }}</span>
+                            </div>
+                          }
+                        </div>
+                        <span class="loan-status-chip" [class]="'chip-' + loan.status.toLowerCase()">
+                          {{ loanStatusLabel(loan.status) }}
+                        </span>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            </mat-tab>
+
+            <!-- Réservations -->
+            <mat-tab>
+              <ng-template mat-tab-label>
+                <mat-icon class="tab-icon">bookmark</mat-icon>
+                Réservations
+                @if (userReservations().length > 0) {
+                  <span class="tab-count">{{ userReservations().length }}</span>
+                }
+              </ng-template>
+
+              <div class="tab-content">
+                @if (reservationsLoading()) {
+                  <div class="loading-state small"><mat-spinner diameter="28" /></div>
+                } @else if (reservationsError()) {
+                  <div class="error-inline">
+                    <mat-icon>error_outline</mat-icon>
+                    <span>{{ reservationsError() }}</span>
+                    <button mat-button (click)="loadUserReservations(user)">Réessayer</button>
+                  </div>
+                } @else if (userReservations().length === 0) {
+                  <div class="empty-inline">
+                    <mat-icon>bookmark_border</mat-icon>
+                    <p>Aucune réservation.</p>
+                  </div>
+                } @else {
+                  <div class="loan-list">
+                    @for (resa of userReservations(); track resa.id) {
+                      <div class="loan-card">
+                        <div class="loan-status-bar" [class]="'bar-' + resa.status.toLowerCase()"></div>
+                        <div class="loan-info">
+                          <strong class="loan-title">{{ resa.bookTitle }}</strong>
+                          <span class="loan-author">{{ resa.bookAuthor }}</span>
+                        </div>
+                        <div class="loan-dates">
+                          <div class="date-pair">
+                            <span class="info-label">Réservé le</span>
+                            <span>{{ resa.reservationDate | date:'dd/MM/yy' }}</span>
+                          </div>
+                          <div class="date-pair">
+                            <span class="info-label">Position</span>
+                            <span>{{ resa.rank }}</span>
+                          </div>
+                        </div>
+                        <span class="loan-status-chip" [class]="'chip-' + resa.status.toLowerCase()">
+                          {{ reservationStatusLabel(resa.status) }}
+                        </span>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            </mat-tab>
+
+          </mat-tab-group>
+        </aside>
+      }
+    </div>
