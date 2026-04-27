@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { LoanResponse } from '../dashboard/models/loan-response.model';
 
 /** Correspond au LoanResponse.java du backend. */
 export interface Loan {
@@ -26,5 +27,13 @@ export class LoansService {
    */
   getMyLoans(): Observable<Loan[]> {
     return this.http.get<Loan[]>('loans/my');
+  }
+
+  getAllLoans(): Observable<LoanResponse[]> {
+    return this.http.get<LoanResponse[]>("loans/all");
+  }
+
+  returnLoan(loanId: number): Observable<void> {
+    return this.http.put<void>(`loans/${loanId}/return`, {});
   }
 }

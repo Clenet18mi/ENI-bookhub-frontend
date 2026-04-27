@@ -1,0 +1,24 @@
+<h2 mat-dialog-title>Confirmer le retour</h2>
+
+<mat-dialog-content class="dialog-content">
+    <section class="summary-card">
+        <div>
+            <p class="eyebrow">Validation de retour</p>
+            <h3>{{ data.bookTitle }}</h3>
+            <p>Emprunteur : <strong>{{ data.userFullName }}</strong></p>
+        </div>
+        <mat-icon class="status-icon">assignment_returned</mat-icon>
+    </section>
+
+    <div class="info-msg">
+        <mat-icon color="primary">info</mat-icon>
+        <p>En confirmant, le livre sera marqué comme disponible et le stock sera incrémenté de +1.</p>
+    </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close>Annuler</button>
+    <button mat-flat-button color="primary" [mat-dialog-close]="true">
+        Confirmer le retour
+    </button>
+</mat-dialog-actions>

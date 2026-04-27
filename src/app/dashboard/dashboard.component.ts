@@ -13,6 +13,9 @@ import { DashboardService } from './services/dashboard.service';
 import { ProfileService } from '../profile/profile.service';
 import { LoanResponse } from './models/loan-response.model';
 import { MatTableModule } from '@angular/material/table';
+import { ReturnConfirmationDialogComponent } from '../common/components/return-confirmation-dialog/return-confirmation-dialog';
+import { LoansService } from '../loans/loans.service';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-dashboard',
@@ -29,7 +32,10 @@ export class DashboardComponent implements OnInit {
 
   private readonly dashService = inject(AdminDashboardService);
   private readonly dashboardSvc = inject(DashboardService);
+  private readonly loanService = inject(LoansService);
   private readonly profileService = inject(ProfileService);
+  private readonly dialog = inject(MatDialog);
+
 
   readonly loading = signal(true);
   readonly allLoans = signal<LoanResponse[]>([]);
@@ -55,21 +61,19 @@ export class DashboardComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    if (!this.isAdmin()) {
-      this.loading.set(false);
-      return;
-    }
+    // if (!this.isAdmin()) {
+    //   this.loading.set(false);
+    //   return;
+    // }
 
     this.loadAdminDashboard();
     this.dashService.loadDashboardStats().subscribe({
       next: () => this.loading.set(false),
       error: () => this.loading.set(false),
     });
-    this.dashboardSvc.getAllLoans().subscribe({
-      next: (loans) => this.allLoans.set(loans),
-      error: (err) => console.error('Erreur chargement emprunts', err)
-    });
+    this.loadAllLoans();
   }
+
 
   reload(): void {
     if (!this.isAdmin()) {
@@ -116,17 +120,33 @@ export class DashboardComponent implements OnInit {
     return { loan: `a emprunté ${book}`, return: `a retourné ${book}`, register: "vient de s'inscrire", reservation: `a réservé ${book}` }[type] ?? '';
   }
 
-  markAsReturned(loanId: number): void {
-    if (confirm('Confirmez-vous le retour de ce livre ?')) {
-      // Pour l'instant, on fait juste un log pour tester
-      console.log('Traitement du retour pour le prêt ID:', loanId);
 
-      /* Plus tard, tu feras l'appel réel :
-      this.dashboardSvc.markAsReturned(loanId).subscribe(() => {
-        this.loadLibrarianData(); // Rafraîchir la liste
-      });
-      */
-    }
+  markAsReturned(loan: LoanResponse) {
+    const dialogRef = this.dialog.open(ReturnConfirmationDialogComponent, {
+      data: {
+        loanId: loan.id,
+        bookTitle: loan.bookTitle,
+        userFullName: loan.userFullName
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        this.loanService.returnLoan(loan.id).subscribe({
+          next: () => {
+            this.loadAllLoans();
+          },
+          error: (err) => console.error('Erreur retour', err)
+        });
+      }
+    });
+  }
+
+  private loadAllLoans(): void {
+    this.loanService.getAllLoans().subscribe({
+      next: (loans) => this.allLoans.set(loans),
+      error: (err) => console.error(err)
+    });
   }
 
   exportLoans(): void {

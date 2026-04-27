@@ -1,0 +1,58 @@
+.dialog-content {
+    display: grid;
+    gap: 1.5rem;
+    min-width: 400px;
+    padding-top: 10px !important;
+}
+
+.summary-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem;
+    border-radius: 16px;
+    background: var(--bh-paper);
+    border: 1px solid rgba(26, 26, 26, .08);
+}
+
+.eyebrow {
+    margin: 0 0 .25rem;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    font-size: .75rem;
+    color: var(--bh-forest-mid);
+}
+
+h3 {
+    margin: 0;
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 1.35rem;
+}
+
+.status-icon {
+    font-size: 40px;
+    width: 40px;
+    height: 40px;
+    color: var(--bh-forest);
+    opacity: 0.6;
+}
+
+.info-msg {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    background: #e0f2fe;
+    padding: 1rem;
+    border-radius: 12px;
+    color: #0369a1;
+}
+
+.info-msg p {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+p {
+    margin: .25rem 0 0;
+    color: var(--bh-ink-mid);
+}
