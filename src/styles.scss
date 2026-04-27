@@ -49,3 +49,13 @@ body {
 a {
   color: inherit;
 }
+
+// ── Snackbar : confirmation de suppression de compte (RGPD) ──────────────────
+.snack-deleted .mdc-snackbar__surface {
+  background-color: #1f4d3a !important; // bh-forest
+  color: #fff !important;
+}
+
+.snack-deleted .mat-mdc-button.mat-mdc-snack-bar-action {
+  color: #a7f3c8 !important;
+}

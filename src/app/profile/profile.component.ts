@@ -484,23 +484,27 @@ ngOnInit(): void {
         if (hasActive) {
           this.deletionBlocked.set(true);
           this.snackBar.open(
-            'Impossible de supprimer votre compte : vous avez des réservations en cours.',
+            'Impossible de supprimer votre compte : vous avez des emprunts ou réservations en cours.',
             'Fermer',
             { duration: 6000, panelClass: 'snack-error' }
           );
           return;
         }
-        // Pas de réservations actives → demander confirmation
+        // Pas de blocage → demander confirmation
         const confirmed = window.confirm(
-          'Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.'
+          'Êtes-vous sûr de vouloir supprimer votre compte ?\n\n' +
+          'Vos données personnelles seront anonymisées conformément au RGPD. ' +
+          'Cette action est irréversible.'
         );
         if (!confirmed) return;
 
         this.deletingAccount.set(true);
         this.profileService.deleteAccount().subscribe({
           next: () => {
-            this.authService.logout();
-            this.router.navigate(['/login']);
+            // Effacer toutes les données de session côté client
+            this.authService.resetClientState();
+            // Rediriger vers /login avec le flag deleted=true pour afficher la notification
+            this.router.navigate(['/login'], { queryParams: { deleted: 'true' } });
           },
           error: (err) => {
             this.deletingAccount.set(false);

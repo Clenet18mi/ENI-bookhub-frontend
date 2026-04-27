@@ -302,8 +302,8 @@ export class ConfirmDialogComponent {
                 class="delete-account-btn"
                 [disabled]="user.id === currentUserId"
                 (click)="deleteUserAccount(user)">
-                <mat-icon>delete_forever</mat-icon>
-                Supprimer
+                <mat-icon>manage_accounts</mat-icon>
+                Anonymiser (RGPD)
               </button>
             </div>
           </section>
@@ -898,24 +898,24 @@ export class AdminComponent implements OnInit {
   deleteUserAccount(user: AdminUser): void {
     const ref = this.dialog.open(ConfirmDialogComponent);
     ref.componentInstance.data = {
-      title: 'Supprimer le compte',
-      message: `Supprimer définitivement le compte de ${user.firstName} ${user.lastName} ?\n\nSes réservations actives seront annulées. Cette action est irréversible.`,
+      title: 'Anonymiser le compte (RGPD)',
+      message:
+        `Anonymiser le compte de ${user.firstName} ${user.lastName} ?\n\n` +
+        `Les données personnelles (nom, prénom, email, téléphone) seront remplacées par des valeurs neutres. ` +
+        `Les réservations actives seront annulées. L'historique des emprunts est conservé pour l'intégrité des données.\n\n` +
+        `Cette action est irréversible.`,
     };
     ref.afterClosed().subscribe((confirmed) => {
       if (!confirmed) return;
       this.adminService.deleteUser(user.id).subscribe({
-        next: ({ hadActiveLoans }) => {
-          // Retirer l'user de la liste
-          this.adminService.users.update((list: AdminUser[]) =>
-            list.filter((u: AdminUser) => u.id !== user.id)
-          );
-          this.selectedUser.set(null);
-          const warn = hadActiveLoans
+        next: (anonymized) => {
+          this.selectedUser.set(anonymized);
+          const warn = anonymized.hadActiveLoans
             ? ' ⚠️ Des emprunts non rendus existent encore sur ce compte.'
             : '';
-          this.snack(`Compte supprimé avec succès.${warn}`);
+          this.snack(`Compte anonymisé avec succès (RGPD).${warn}`);
         },
-        error: (err) => this.snack(err?.error?.message ?? 'Erreur lors de la suppression.', true),
+        error: (err) => this.snack(err?.error?.message ?? 'Erreur lors de l\'anonymisation.', true),
       });
     });
   }

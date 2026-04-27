@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -7,6 +7,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { AuthService } from '../auth.service';
 
 @Component({
@@ -21,15 +22,17 @@ import { AuthService } from '../auth.service';
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
+    MatSnackBarModule,
   ],
   templateUrl: './login-page.component.html',
   styleUrl: './login-page.component.scss',
 })
-export class LoginPageComponent {
+export class LoginPageComponent implements OnInit {
   private readonly fb = new FormBuilder();
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly snackBar = inject(MatSnackBar);
 
   readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -39,6 +42,27 @@ export class LoginPageComponent {
 
   readonly loading = signal(false);
   readonly errorMessage = signal('');
+
+  ngOnInit(): void {
+    const deleted = this.route.snapshot.queryParamMap.get('deleted');
+    if (deleted === 'true') {
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: {},
+        replaceUrl: true,
+      });
+      this.snackBar.open(
+        'Votre compte a bien été supprimé. Vos données ont été anonymisées conformément au RGPD.',
+        'Fermer',
+        {
+          duration: 8000,
+          panelClass: ['snack-deleted'],
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+        }
+      );
+    }
+  }
 
   submit(): void {
     this.form.markAllAsTouched();
