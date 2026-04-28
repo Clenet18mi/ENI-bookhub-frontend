@@ -1,5 +1,7 @@
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
@@ -15,14 +17,18 @@ import { ReservationCancelDialogComponent } from './reservation-cancel-dialog.co
  *
  * Affiche la liste des réservations de l'utilisateur avec :
  *  - rang dans la file d'attente
- *  - statut (WAITING / AVAILABLE / BORROWED / CANCELED)
- *  - bouton d'annulation conditionnel (WAITING | AVAILABLE uniquement)
+ *  - statut (PENDING / AVAILABLE / BORROWED / CANCELLED)
+ *  - bouton d'annulation conditionnel (PENDING | AVAILABLE uniquement)
+ *  - les réservations annulées sont toujours affichées en bas de liste
+ *  - filtre par statut : Toutes / En attente / Disponible / Annulée
  */
 @Component({
   selector: 'app-reservations',
   standalone: true,
   imports: [
+    FormsModule,
     MatButtonModule,
+    MatButtonToggleModule,
     MatChipsModule,
     MatDialogModule,
     MatIconModule,
@@ -44,8 +50,37 @@ export class ReservationsComponent implements OnInit {
   readonly error        = signal<string | null>(null);
   readonly cancelling   = signal<number | null>(null);
 
+  /** Filtre actif sur le statut. 'ALL' = toutes sauf aucun filtre. */
+  statusFilter = signal<ReservationStatus | 'ALL'>('ALL');
+
   readonly activeCount    = computed(() => this.reservations().filter(r => r.status === 'PENDING').length);
   readonly availableCount = computed(() => this.reservations().filter(r => r.status === 'AVAILABLE').length);
+  readonly cancelledCount = computed(() => this.reservations().filter(r => r.status === 'CANCELLED').length);
+
+  /**
+   * Liste filtrée + triée :
+   *  1. Actives (PENDING, AVAILABLE, BORROWED) → triées par date desc
+   *  2. Annulées (CANCELLED) → toujours en bas, triées par date desc
+   */
+  readonly filteredReservations = computed(() => {
+    const filter = this.statusFilter();
+    const all    = this.reservations();
+
+    const active    = all.filter(r => r.status !== 'CANCELLED');
+    const cancelled = all.filter(r => r.status === 'CANCELLED');
+
+    let combined: ReservationItem[];
+
+    if (filter === 'ALL') {
+      combined = [...active, ...cancelled];
+    } else if (filter === 'CANCELLED') {
+      combined = cancelled;
+    } else {
+      combined = active.filter(r => r.status === filter);
+    }
+
+    return combined;
+  });
 
   ngOnInit(): void {
     this.load();
@@ -67,6 +102,10 @@ export class ReservationsComponent implements OnInit {
     });
   }
 
+  setFilter(filter: ReservationStatus | 'ALL'): void {
+    this.statusFilter.set(filter);
+  }
+
   confirmCancel(item: ReservationItem): void {
     const dialogRef = this.dialog.open(ReservationCancelDialogComponent, {
       data: { bookTitle: item.bookTitle },
@@ -86,7 +125,7 @@ export class ReservationsComponent implements OnInit {
     this.reservationsService.cancelReservation(item.id).subscribe({
       next: () => {
         this.cancelling.set(null);
-        // Retirer la réservation de la liste et mettre à jour les rangs localement
+        // Mettre à jour le statut localement et réordonner les rangs
         this.reservations.update(list =>
           list
             .map(r => r.id === item.id ? { ...r, status: 'CANCELLED' as const } : r)
@@ -118,7 +157,7 @@ export class ReservationsComponent implements OnInit {
       case 'PENDING':   return 'En attente';
       case 'AVAILABLE': return 'Disponible !';
       case 'BORROWED':  return 'Emprunté';
-      case 'CANCELLED':  return 'Annulée';
+      case 'CANCELLED': return 'Annulée';
     }
   }
 
@@ -127,7 +166,7 @@ export class ReservationsComponent implements OnInit {
       case 'PENDING':   return 'schedule';
       case 'AVAILABLE': return 'check_circle';
       case 'BORROWED':  return 'menu_book';
-      case 'CANCELLED':  return 'cancel';
+      case 'CANCELLED': return 'cancel';
     }
   }
 
