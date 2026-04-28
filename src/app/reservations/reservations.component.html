@@ -1,0 +1,102 @@
+<section class="reservations-page">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Espace lecteur</p>
+      <h1>Mes réservations</h1>
+      <p class="lead">Suivez votre position dans la file d'attente et annulez si nécessaire.</p>
+    </div>
+    <div class="header-stats">
+      <div class="stat-card">
+        <strong>{{ activeCount() }}</strong>
+        <span>en attente</span>
+      </div>
+      <div class="stat-card available">
+        <strong>{{ availableCount() }}</strong>
+        <span>disponible(s)</span>
+      </div>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <div class="spinner-wrap">
+      <mat-spinner diameter="48" />
+      <p>Chargement de vos réservations…</p>
+    </div>
+  }
+
+  @if (error()) {
+    <div class="error-banner" role="alert">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ error() }}</span>
+      <button mat-stroked-button (click)="load()">Réessayer</button>
+    </div>
+  }
+
+  @if (!loading() && !error()) {
+    @if (reservations().length === 0) {
+      <div class="empty-state">
+        <mat-icon>bookmark_border</mat-icon>
+        <p>Vous n'avez aucune réservation pour le moment.</p>
+        <p class="empty-sub">Rendez-vous sur le catalogue pour réserver un livre indisponible.</p>
+      </div>
+    } @else {
+      <ul class="reservation-list" role="list">
+        @for (item of reservations(); track item.id) {
+          <li class="reservation-card" [class]="'status-' + item.status.toLowerCase()">
+            <div class="cover-block" aria-hidden="true">
+              @if (item.bookCoverUrl) {
+                <img [src]="item.bookCoverUrl" [alt]="item.bookTitle" loading="lazy" />
+              } @else {
+                <mat-icon class="book-icon">auto_stories</mat-icon>
+              }
+            </div>
+
+            <div class="book-info">
+              <h2 class="book-title">{{ item.bookTitle }}</h2>
+              <p class="book-author">{{ item.bookAuthor }}</p>
+              @if (item.bookCategory) {
+                <span class="category-tag">{{ item.bookCategory }}</span>
+              }
+              <p class="res-date">Réservé le {{ formatDate(item.reservationDate) }}</p>
+            </div>
+
+            <div class="rank-block">
+              @if (item.status === 'PENDING' || item.status === 'AVAILABLE') {
+                <div class="rank-badge" [class.rank-available]="item.status === 'AVAILABLE'">
+                  <span class="rank-num">{{ item.rank }}</span>
+                  <span class="rank-label">{{ item.rank === 1 ? 'er' : 'ème' }}</span>
+                </div>
+                <p class="rank-desc">{{ item.rank === 1 ? 'en tête de file' : 'dans la file' }}</p>
+              }
+
+              <span class="status-badge" [class]="statusClass(item.status)">
+                <mat-icon class="status-icon">{{ statusIcon(item.status) }}</mat-icon>
+                {{ statusLabel(item.status) }}
+              </span>
+            </div>
+
+            <div class="actions">
+              @if (canCancel(item.status)) {
+                <button
+                  mat-stroked-button
+                  color="warn"
+                  [disabled]="cancelling() === item.id"
+                  (click)="confirmCancel(item)"
+                  [matTooltip]="'Annuler cette réservation'"
+                  aria-label="Annuler la réservation de {{ item.bookTitle }}"
+                >
+                  @if (cancelling() === item.id) {
+                    <mat-spinner diameter="18" />
+                  } @else {
+                    <mat-icon>cancel</mat-icon>
+                  }
+                  Annuler
+                </button>
+              }
+            </div>
+          </li>
+        }
+      </ul>
+    }
+  }
+</section>

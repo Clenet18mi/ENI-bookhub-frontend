@@ -46,7 +46,6 @@ interface ShellNavItem {
           </div>
         </div>
 
-        <!-- Séparateur de section nav -->
         @if (isAdmin()) {
           <div class="nav-section-label">Administration</div>
         } @else {
@@ -61,6 +60,21 @@ interface ShellNavItem {
             </a>
           }
         </nav>
+
+        <!-- Profil sidebar -->
+        <div class="sidebar-profile">
+          <a class="sidebar-profile-chip" routerLink="/profile">
+            <div class="avatar">{{ userInitials() }}</div>
+            <div class="profile-meta">
+              <strong>{{ userLabel() }}</strong>
+              <span>{{ userEmail() }}</span>
+            </div>
+          </a>
+          <button mat-icon-button class="logout-icon-btn" (click)="logout()" aria-label="Déconnexion">
+            <mat-icon>logout</mat-icon>
+          </button>
+        </div>
+
       </mat-sidenav>
 
       <mat-sidenav-content class="content-shell">
@@ -76,7 +90,6 @@ interface ShellNavItem {
 
           <span class="spacer"></span>
 
-          <!-- Badge rôle dans la topbar -->
           @if (isAdmin()) {
             <span class="role-chip admin-chip">
               <mat-icon>admin_panel_settings</mat-icon>
@@ -113,16 +126,12 @@ interface ShellNavItem {
     :host { display: block; min-height: 100vh; }
     .shell { min-height: 100vh; background: linear-gradient(180deg, #f7f3ea 0%, #f3eee3 100%); }
 
-    /* ── Sidenav ─────────────────────────────────────────────────────────────── */
     .sidenav {
       width: 280px; padding: 1.25rem; display: flex; flex-direction: column;
       background: rgba(255,255,255,.96); border-right: 1px solid rgba(26,26,26,.08);
     }
 
-    .brand-block {
-      display: flex; align-items: center; gap: .9rem;
-      padding: .75rem .25rem 1.25rem;
-    }
+    .brand-block { display: flex; align-items: center; gap: .9rem; padding: .75rem .25rem 1.25rem; }
     .brand-mark, .avatar {
       width: 3rem; height: 3rem; border-radius: 1rem;
       display: grid; place-items: center;
@@ -131,10 +140,7 @@ interface ShellNavItem {
     .brand-mark { background: var(--bh-forest); color: #fff; font-size: 1.35rem; }
     .brand-name { font-family: 'DM Serif Display', Georgia, serif; font-size: 1.55rem; line-height: 1; }
     .brand-name span { color: var(--bh-amber); }
-    .brand-tag {
-      display: flex; align-items: center; gap: .25rem;
-      color: var(--bh-ink-light); font-size: .82rem;
-    }
+    .brand-tag { display: flex; align-items: center; gap: .25rem; color: var(--bh-ink-light); font-size: .82rem; }
     .brand-tag.admin-tag { color: #b45309; font-weight: 600; }
     .tag-icon { font-size: .95rem; width: .95rem; height: .95rem; }
 
@@ -145,23 +151,18 @@ interface ShellNavItem {
 
     .nav-list { display: grid; gap: .35rem; }
     .nav-list a { border-radius: 14px; margin: 0 .15rem; text-decoration: none; }
-    .nav-list a:hover,
-    .nav-list a:visited,
-    .nav-list a:active { text-decoration: none; }
+    .nav-list a:hover, .nav-list a:visited, .nav-list a:active { text-decoration: none; }
     .nav-list a.active { background: var(--bh-forest-pale); color: var(--bh-forest); }
 
-    /* ── Sidebar profil ──────────────────────────────────────────────────────── */
     .sidebar-profile {
-      margin-top: auto;
-      padding-top: 1rem;
+      margin-top: auto; padding-top: 1rem;
       border-top: 1px solid rgba(0,0,0,.07);
       display: flex; align-items: center; gap: .5rem;
     }
     .sidebar-profile-chip {
       display: flex; align-items: center; gap: .65rem;
       flex: 1; text-decoration: none; color: inherit;
-      padding: .45rem; border-radius: 12px;
-      transition: background .15s;
+      padding: .45rem; border-radius: 12px; transition: background .15s;
     }
     .sidebar-profile-chip:hover { background: rgba(0,0,0,.04); }
     .sidebar-profile-chip .avatar { width: 2.4rem; height: 2.4rem; background: var(--bh-forest); color: #fff; font-size: .85rem; border-radius: 999px; }
@@ -170,7 +171,6 @@ interface ShellNavItem {
     .profile-meta span { font-size: .75rem; color: var(--bh-ink-light); }
     .logout-icon-btn { flex-shrink: 0; color: var(--bh-ink-light); }
 
-    /* ── Topbar ───────────────────────────────────────────────────────────────── */
     .content-shell { min-height: 100vh; }
     .topbar {
       position: sticky; top: 0; z-index: 5; gap: .75rem;
@@ -185,11 +185,10 @@ interface ShellNavItem {
 
     .role-chip {
       display: inline-flex; align-items: center; gap: .3rem;
-      padding: .3rem .75rem; border-radius: 999px;
-      font-size: .8rem; font-weight: 700;
+      padding: .3rem .75rem; border-radius: 999px; font-size: .8rem; font-weight: 700;
     }
     .role-chip mat-icon { font-size: .9rem; width: .9rem; height: .9rem; }
-    .admin-chip    { background: #fef3c7; color: #92400e; }
+    .admin-chip     { background: #fef3c7; color: #92400e; }
     .librarian-chip { background: rgba(31,77,58,.1); color: var(--bh-forest); }
 
     .profile-chip {
@@ -207,8 +206,7 @@ interface ShellNavItem {
     @media (max-width: 960px) { .sidenav { width: min(86vw, 300px); } }
     @media (max-width: 640px) {
       .topbar { padding-inline: .5rem; }
-      .topbar-copy span, .logout-button span,
-      .profile-meta span, .role-chip { display: none; }
+      .topbar-copy span, .logout-button span, .profile-meta span, .role-chip { display: none; }
       .main-content { padding: .85rem; }
     }
   `],
@@ -218,24 +216,22 @@ export class AppShellComponent implements OnInit {
   private readonly profileService = inject(ProfileService);
   private readonly router         = inject(Router);
 
-  /** Navigation selon le rôle */
   readonly navItems = computed<ShellNavItem[]>(() => {
     const role = this.profileService.currentProfile()?.role;
 
-    // Admin : uniquement les vues admin
     if (role === 'ROLE_ADMIN') {
       return [
-        { label: 'Tableau de bord', icon: 'space_dashboard',      link: '/dashboard' },
-        { label: 'Utilisateurs',    icon: 'group',                 link: '/admin' },
+        { label: 'Tableau de bord', icon: 'space_dashboard', link: '/dashboard' },
+        { label: 'Utilisateurs',    icon: 'group',            link: '/admin' },
       ];
     }
 
-    // Bibliothécaire : vue lecteur + gestion
     if (role === 'ROLE_LIBRARIAN') {
       return [
-        { label: 'Tableau de bord', icon: 'space_dashboard', link: '/dashboard' },
-        { label: 'Catalogue',       icon: 'local_library',   link: '/catalogue' },
-        { label: 'Mes emprunts',    icon: 'calendar_month',  link: '/loans' },
+        { label: 'Tableau de bord', icon: 'space_dashboard',  link: '/dashboard' },
+        { label: 'Catalogue',       icon: 'local_library',    link: '/catalogue' },
+        { label: 'Mes emprunts',    icon: 'calendar_month',   link: '/loans' },
+        { label: 'Réservations',    icon: 'bookmark',         link: '/reservations' },
       ];
     }
 
@@ -244,13 +240,14 @@ export class AppShellComponent implements OnInit {
       { label: 'Tableau de bord', icon: 'space_dashboard', link: '/dashboard' },
       { label: 'Catalogue',       icon: 'local_library',   link: '/catalogue' },
       { label: 'Mes emprunts',    icon: 'calendar_month',  link: '/loans' },
+      { label: 'Réservations',    icon: 'bookmark',        link: '/reservations' },
     ];
   });
 
-  readonly isAdmin = computed(() => this.profileService.currentProfile()?.role === 'ROLE_ADMIN');
+  readonly isAdmin     = computed(() => this.profileService.currentProfile()?.role === 'ROLE_ADMIN');
   readonly isLibrarian = computed(() => this.profileService.currentProfile()?.role === 'ROLE_LIBRARIAN');
 
-  protected isMobile = typeof window !== 'undefined' ? window.innerWidth < 960 : false;
+  protected isMobile     = typeof window !== 'undefined' ? window.innerWidth < 960 : false;
   protected drawerOpened = !this.isMobile;
 
   ngOnInit(): void {
@@ -270,7 +267,8 @@ export class AppShellComponent implements OnInit {
   }
 
   userEmail(): string {
-    return this.profileService.currentProfile()?.email ?? this.authService.getSession()?.user.email ?? '';
+    return this.profileService.currentProfile()?.email
+        ?? this.authService.getSession()?.user.email ?? '';
   }
 
   userInitials(): string {
@@ -292,7 +290,7 @@ export class AppShellComponent implements OnInit {
 
   @HostListener('window:resize')
   onResize(): void {
-    this.isMobile = typeof window !== 'undefined' ? window.innerWidth < 960 : false;
+    this.isMobile     = typeof window !== 'undefined' ? window.innerWidth < 960 : false;
     this.drawerOpened = !this.isMobile;
   }
 }
