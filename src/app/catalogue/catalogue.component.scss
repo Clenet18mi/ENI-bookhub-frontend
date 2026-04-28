@@ -35,5 +35,26 @@
     .available { background: rgba(31,77,58,.1); color: #2e7d50; }
     .loaned { background: #fff3da; color: #8a5a00; }
 
+    /* ── Badge "Déjà réservé" ─────────────────────────────────────────── */
+    .already-reserved-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      padding: .45rem .9rem;
+      border-radius: 999px;
+      background: rgba(31, 77, 58, .1);
+      border: 1.5px solid rgba(31, 77, 58, .25);
+      color: #2e7d50;
+      font-size: .82rem;
+      font-weight: 700;
+      cursor: default;
+      user-select: none;
+    }
+    .already-reserved-badge mat-icon {
+      font-size: 1rem;
+      width: 1rem;
+      height: 1rem;
+    }
+
     @media (max-width: 960px) { .filters { grid-template-columns: 1fr; } .hero { flex-direction: column; } }
     @media (max-width: 640px) { .book-card { grid-template-columns: 1fr; } }

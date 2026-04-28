@@ -104,6 +104,18 @@
                     <button mat-flat-button color="primary" type="button" disabled>
                       <mat-icon>menu_book</mat-icon> Emprunter
                     </button>
+                  } @else if (isAlreadyReserved(book)) {
+                    <!-- Livre déjà réservé par l'utilisateur connecté -->
+                    <div
+                      class="already-reserved-badge"
+                      matTooltip="Vous avez déjà une réservation active pour ce livre"
+                      matTooltipPosition="above"
+                      role="status"
+                      aria-label="Vous avez déjà réservé ce livre"
+                    >
+                      <mat-icon>bookmark</mat-icon>
+                      Déjà réservé
+                    </div>
                   } @else {
                     <!-- Réservation (US-RESA-01) -->
                     <button

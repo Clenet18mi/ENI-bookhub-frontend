@@ -33,8 +33,32 @@
       min-width: 90px;
     }
     .stat-card.available { border-color: rgba(31,77,58,.25); background: rgba(31,77,58,.04); }
+    .stat-card.cancelled { border-color: rgba(26,26,26,.09); background: #fafafa; }
+    .stat-card.cancelled.has-cancelled { border-color: rgba(136,136,136,.3); background: #f5f5f5; }
     .stat-card strong { display: block; font-size: 1.7rem; font-weight: 800; line-height: 1; }
     .stat-card span { font-size: .78rem; color: var(--bh-ink-mid, #666); }
+
+    /* ── Barre de filtres ─────────────────────────────────────────────── */
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .5rem;
+      padding: .75rem 1rem;
+      border-radius: 1rem;
+      background: #fafafa;
+      border: 1px solid rgba(26,26,26,.07);
+    }
+    .filter-bar button {
+      border-radius: 999px !important;
+      font-size: .82rem;
+      font-weight: 600;
+      transition: background .15s, color .15s, border-color .15s;
+    }
+    .filter-bar button.filter-active {
+      background: rgba(31,77,58,.12);
+      border-color: rgba(31,77,58,.35);
+      color: #2e7d50;
+    }
 
     /* ── États ───────────────────────────────────────────────────────── */
     .spinner-wrap {
@@ -68,12 +92,12 @@
       border-radius: 1.1rem;
       background: #fff;
       border: 1px solid rgba(26,26,26,.08);
-      transition: box-shadow .2s;
+      transition: box-shadow .2s, opacity .2s;
     }
     .reservation-card:hover { box-shadow: 0 4px 18px rgba(0,0,0,.07); }
     .reservation-card.status-available { border-left: 4px solid #2e7d50; }
-    .reservation-card.status-waiting   { border-left: 4px solid #e6820a; }
-    .reservation-card.status-canceled  { opacity: .55; }
+    .reservation-card.status-pending   { border-left: 4px solid #e6820a; }
+    .reservation-card.status-cancelled { opacity: .55; }
     .reservation-card.status-borrowed  { border-left: 4px solid #1565c0; }
 
     /* Couverture */
@@ -129,6 +153,8 @@
     /* Responsive */
     @media (max-width: 768px) {
       .page-header { flex-direction: column; align-items: flex-start; }
+      .header-stats { flex-wrap: wrap; }
+      .filter-bar { gap: .35rem; }
       .reservation-card {
         grid-template-columns: 3.5rem 1fr;
         grid-template-rows: auto auto auto;
