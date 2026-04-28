@@ -1,0 +1,132 @@
+<section class="catalogue-page">
+
+      <!-- En-tête -->
+      <header class="hero">
+        <div>
+          <p class="eyebrow">Catalogue BookHub</p>
+          <h1>Explorer, réserver et lire plus facilement.</h1>
+          <p class="lead">Parcourez le fonds, filtrez par disponibilité et réservez un livre indisponible.</p>
+        </div>
+        <div class="hero-stats">
+          <div><strong>{{ totalBooks() }}</strong><span>livres</span></div>
+          <div><strong>{{ availableBooks() }}</strong><span>disponibles</span></div>
+          <div><strong>{{ unavailableBooks() }}</strong><span>réservables</span></div>
+        </div>
+      </header>
+
+      <!-- Filtres -->
+      <section class="filters" aria-label="Filtres du catalogue">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Rechercher un livre</mat-label>
+          <input matInput [(ngModel)]="query" placeholder="Titre, auteur, ISBN" />
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Catégorie</mat-label>
+          <mat-select [(ngModel)]="category">
+            <mat-option value="all">Toutes</mat-option>
+            @for (cat of categories(); track cat) {
+              <mat-option [value]="cat">{{ cat }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Disponibilité</mat-label>
+          <mat-select [(ngModel)]="availability">
+            <mat-option value="all">Toutes</mat-option>
+            <mat-option value="available">Disponibles</mat-option>
+            <mat-option value="unavailable">Empruntés</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Trier</mat-label>
+          <mat-select [(ngModel)]="sortBy">
+            <mat-option value="featured">Mis en avant</mat-option>
+            <mat-option value="title">Titre A–Z</mat-option>
+            <mat-option value="rating">Note ↓</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </section>
+
+      <!-- Résultats -->
+      <section class="results-head">
+        <div>
+          <h2>Résultats</h2>
+          <p>{{ filteredBooks().length }} livre(s) correspondant à votre recherche.</p>
+        </div>
+        <button mat-button type="button" (click)="resetFilters()">
+          <mat-icon>filter_alt_off</mat-icon> Réinitialiser
+        </button>
+      </section>
+
+      <!-- Spinner chargement -->
+      @if (loading()) {
+        <div class="spinner-wrap"><mat-spinner diameter="48" /></div>
+      }
+
+      <!-- Liste -->
+      @if (!loading()) {
+        <section class="book-list">
+          @for (book of filteredBooks(); track book.id) {
+            <mat-card class="book-card">
+              <div class="cover" aria-hidden="true">
+                @if (book.coverUrl) {
+                  <img [src]="book.coverUrl" [alt]="book.title" loading="lazy" />
+                } @else {
+                  <mat-icon>auto_stories</mat-icon>
+                }
+              </div>
+              <div class="book-body">
+                <div class="book-top">
+                  <div>
+                    <h3>{{ book.title }}</h3>
+                    <p>{{ book.author }}</p>
+                  </div>
+                  @if (book.averageRating > 0) {
+                    <span class="rating"><mat-icon>star</mat-icon>{{ book.averageRating.toFixed(1) }}</span>
+                  }
+                </div>
+                @if (book.category) { <span class="chip-cat">{{ book.category }}</span> }
+                @if (book.description) { <p class="summary">{{ book.description | slice:0:120 }}…</p> }
+
+                <div class="status-row">
+                  <span class="status" [class.available]="isAvailable(book)" [class.loaned]="!isAvailable(book)">
+                    {{ isAvailable(book) ? 'Disponible' : 'Emprunté' }}
+                  </span>
+                  @if (!isAvailable(book)) {
+                    <span class="meta">{{ book.availableCopies }}/{{ book.totalCopies }} ex.</span>
+                  }
+                </div>
+
+                <div class="actions">
+                  @if (isAvailable(book)) {
+                    <!-- Emprunt : implémenté dans LoanController -->
+                    <button mat-flat-button color="primary" type="button" disabled>
+                      <mat-icon>menu_book</mat-icon> Emprunter
+                    </button>
+                  } @else {
+                    <!-- Réservation (US-RESA-01) -->
+                    <button
+                      mat-flat-button
+                      color="accent"
+                      type="button"
+                      [disabled]="reserving() === book.id"
+                      (click)="reserve(book)"
+                      aria-label="Réserver {{ book.title }}"
+                    >
+                      @if (reserving() === book.id) {
+                        <mat-spinner diameter="18" />
+                      } @else {
+                        <mat-icon>bookmark_add</mat-icon>
+                      }
+                      Réserver
+                    </button>
+                  }
+                </div>
+              </div>
+            </mat-card>
+          }
+        </section>
+      }
+
+    </section>

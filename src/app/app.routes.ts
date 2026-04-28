@@ -26,6 +26,11 @@ export const routes: Routes = [
         loadComponent: () => import('./loans/loans.component').then((m) => m.LoansComponent),
       },
       {
+        path: 'reservations',
+        loadComponent: () =>
+          import('./reservations/reservations.component').then((m) => m.ReservationsComponent),
+      },
+      {
         path: 'profile',
         loadComponent: () => import('./profile/profile.component').then((m) => m.ProfileComponent),
       },

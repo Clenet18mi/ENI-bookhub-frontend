@@ -1,0 +1,57 @@
+<h2 mat-dialog-title>Réserver ce livre</h2>
+<mat-dialog-content class="dialog-content">
+  <section class="summary-card">
+    <div>
+      <p class="eyebrow">{{ data.book.category }}</p>
+      <h3>{{ data.book.title }}</h3>
+      <p>{{ data.book.author }}</p>
+    </div>
+    <span class="status" [class]="data.book.status">{{ statusLabel }}</span>
+  </section>
+
+  <section class="info-grid">
+    <div>
+      <strong>Rang estimé</strong>
+      <p>#{{ data.preview.rank }}</p>
+    </div>
+    <div>
+      <strong>Créneau demandé</strong>
+      <p>{{ data.preview.requestedStartDate }} → {{ data.preview.requestedEndDate }}</p>
+    </div>
+    <div class="wide">
+      <strong>Créneau effectif</strong>
+      <p>{{ data.preview.effectiveStartDate }} → {{ data.preview.effectiveEndDate }}</p>
+    </div>
+    <div class="wide">
+      <strong>État</strong>
+      <p>{{ data.preview.note }}</p>
+    </div>
+  </section>
+
+  <form [formGroup]="form" class="dialog-form">
+    <p class="hint">La réservation est préparée pour le backend avec créneau, file d’attente et validation.</p>
+
+    <div class="date-grid">
+      <mat-form-field appearance="outline">
+        <mat-label>Date de début</mat-label>
+        <input matInput type="date" formControlName="startDate" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Date de fin</mat-label>
+        <input matInput type="date" formControlName="endDate" />
+      </mat-form-field>
+    </div>
+
+    <mat-checkbox formControlName="acceptRules">
+      J'accepte les conditions de réservation et d'attente.
+    </mat-checkbox>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Annuler</button>
+  <button mat-flat-button color="primary" [mat-dialog-close]="form.getRawValue()" [disabled]="form.invalid">
+    Confirmer la réservation
+  </button>
+</mat-dialog-actions>

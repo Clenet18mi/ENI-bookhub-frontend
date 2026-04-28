@@ -1,0 +1,15 @@
+<div class="dialog-wrap">
+      <mat-icon class="warn-icon">warning_amber</mat-icon>
+      <h2 mat-dialog-title>Annuler la réservation ?</h2>
+      <mat-dialog-content>
+        <p>
+          Vous êtes sur le point d'annuler votre réservation pour
+          <strong>« {{ data.bookTitle }} »</strong>.
+        </p>
+        <p class="sub">Cette action est irréversible. Vous perdrez votre position dans la file d'attente.</p>
+      </mat-dialog-content>
+      <mat-dialog-actions align="end">
+        <button mat-stroked-button (click)="close(false)">Conserver</button>
+        <button mat-flat-button color="warn" (click)="close(true)">Oui, annuler</button>
+      </mat-dialog-actions>
+    </div>
