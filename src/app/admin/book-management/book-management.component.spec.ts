@@ -1,29 +1,50 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MatTableModule } from '@angular/material/table';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
+import { TestBed } from '@angular/core/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { BookManagementComponent } from './book-management.component';
 import { BookService } from '../../core/services/book.service';
-import { Book } from '../../core/models/book.model';
 
-@Component({
-  selector: 'app-book-management',
-  standalone: true,
-  imports: [CommonModule, MatTableModule, MatButtonModule, MatIconModule],
-  templateUrl: './book-management.component.html'
-})
-export class BookManagementComponent implements OnInit {
-  private bookService = inject(BookService);
-  books: Book[] = [];
-  displayedColumns = ['title', 'author', 'totalCopies', 'actions'];
+describe('BookManagementComponent', () => {
+  let httpMock: HttpTestingController;
 
-  ngOnInit() { this.loadBooks(); }
+  beforeEach(async () => {
+    spyOn(window, 'confirm').and.returnValue(true);
 
-  loadBooks() { this.bookService.getBooks().subscribe(res => this.books = res); }
+    await TestBed.configureTestingModule({
+      imports: [BookManagementComponent],
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    }).compileComponents();
 
-  deleteBook(id: number) {
-    if(confirm('Supprimer ce livre ?')) {
-      this.bookService.deleteBook(id).subscribe(() => this.loadBooks());
-    }
-  }
-}
+    httpMock = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => {
+    httpMock.verify();
+  });
+
+  it('loads books on init', () => {
+    const fixture = TestBed.createComponent(BookManagementComponent);
+    fixture.detectChanges();
+
+    const req = httpMock.expectOne('books');
+    expect(req.request.method).toBe('GET');
+    req.flush([{ id: 1, title: 'Dune', author: 'Frank Herbert', isbn: '1', totalCopies: 3 }]);
+
+    expect(fixture.componentInstance.books.length).toBe(1);
+  });
+
+  it('deletes a book when confirmed', () => {
+    const fixture = TestBed.createComponent(BookManagementComponent);
+    fixture.detectChanges();
+
+    httpMock.expectOne('books').flush([]);
+
+    fixture.componentInstance.deleteBook(5);
+
+    const deleteReq = httpMock.expectOne('books/5');
+    expect(deleteReq.request.method).toBe('DELETE');
+    deleteReq.flush({});
+
+    httpMock.expectOne('books').flush([]);
+  });
+});
