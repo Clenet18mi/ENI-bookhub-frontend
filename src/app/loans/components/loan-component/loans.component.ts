@@ -12,7 +12,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { Loan, LoansService } from './loans.service';
+import { LoansService } from '../../services/loans.service';
+import { Loan } from '../../models/loan.model';
 
 @Component({
   selector: 'app-loans',
@@ -108,10 +109,15 @@ export class LoansComponent implements OnInit {
   progressPct(loanDate: string, dueDate: string): number {
     const start = new Date(loanDate).getTime();
     const end = new Date(dueDate).getTime();
-    const now = Date.now();
+
+    const now = new Date().getTime();
+
     const total = end - start;
     if (total <= 0) return 100;
-    return Math.min(100, Math.max(0, ((now - start) / total) * 100));
+
+    const pct = ((now - start) / total) * 100;
+
+    return Math.min(100, Math.max(0, Math.round(pct * 100) / 100));
   }
 
   // ── Helpers affichage ────────────────────────────────────────────────────

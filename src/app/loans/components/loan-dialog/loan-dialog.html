@@ -1,0 +1,41 @@
+<h2 mat-dialog-title>Confirmer l'emprunt</h2>
+
+<mat-dialog-content class="dialog-content">
+    <section class="summary-card">
+        <div>
+            <p class="eyebrow">{{ data.book.category }}</p>
+            <h3>{{ data.book.title }}</h3>
+            <p>{{ data.book.author }}</p>
+        </div>
+    </section>
+
+    <section class="info-grid">
+        <div>
+            <strong>Date d'emprunt</strong>
+            <p>{{ data.preview.startDate | date:'dd/MM/yyyy' }}</p>
+        </div>
+        <div class="wide">
+            <strong>Date de retour prévue</strong>
+            <p>{{ data.preview.endDate | date:'dd/MM/yyyy' }}</p>
+        </div>
+
+        @if (data.preview.note) {
+        <div class="wide">
+            <strong>Note</strong>
+            <p>{{ data.preview.note }}</p>
+        </div>
+        }
+    </section>
+    <form [formGroup]="form" class="dialog-form">
+        <mat-checkbox formControlName="acceptRules" color="primary">
+            J'accepte les conditions d'emprunt.
+        </mat-checkbox>
+    </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close>Annuler</button>
+    <button mat-flat-button color="primary" [mat-dialog-close]="true" [disabled]="form.invalid">
+        Confirmer l'emprunt
+    </button>
+</mat-dialog-actions>

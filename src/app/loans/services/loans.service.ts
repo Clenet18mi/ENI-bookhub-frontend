@@ -1,21 +1,11 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { LoanResponse } from '../dashboard/models/loan-response.model';
+import { Loan } from '../models/loan.model';
+import { LoanResponse } from '../models/loan-response.model';
 
 /** Correspond au LoanResponse.java du backend. */
-export interface Loan {
-  id: number;
-  bookId: number;
-  bookTitle: string;
-  bookAuthor: string;
-  bookCategory: string | null;
-  bookCoverUrl: string | null;
-  loanDate: string;   // ISO date  (yyyy-MM-dd)
-  dueDate: string;    // ISO date
-  returnDate: string | null;
-  status: 'ACTIVE' | 'OVERDUE' | 'RETURNED' | 'PENDING';
-}
+
 
 @Injectable({ providedIn: 'root' })
 export class LoansService {
@@ -35,5 +25,13 @@ export class LoansService {
 
   returnLoan(loanId: number): Observable<void> {
     return this.http.put<void>(`loans/${loanId}/return`, {});
+  }
+
+  createLoan(bookId: number): Observable<LoanResponse> {
+    return this.http.post<LoanResponse>(`loans/create`, { bookId })
+  }
+
+  getLoanCount(): Observable<number> {
+    return this.http.get<number>(`loans/count`);
   }
 }

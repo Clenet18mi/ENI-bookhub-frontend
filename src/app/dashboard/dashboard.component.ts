@@ -11,10 +11,10 @@ import { MatDividerModule } from '@angular/material/divider';
 import { AdminDashboardService, AdminDashboardStats } from '../admin/admin-dashboard.service';
 import { DashboardService } from './services/dashboard.service';
 import { ProfileService } from '../profile/profile.service';
-import { LoanResponse } from './models/loan-response.model';
+import { LoanResponse } from '../loans/models/loan-response.model';
 import { MatTableModule } from '@angular/material/table';
 import { ReturnConfirmationDialogComponent } from '../common/components/return-confirmation-dialog/return-confirmation-dialog';
-import { LoansService } from '../loans/loans.service';
+import { LoansService } from '../loans/services/loans.service';
 import { MatDialog } from '@angular/material/dialog';
 
 @Component({

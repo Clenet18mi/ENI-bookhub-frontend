@@ -1,0 +1,20 @@
+  .content {
+      display: grid;
+      gap: .35rem;
+      min-width: min(92vw, 420px);
+  }
+
+  .success-badge {
+      width: 3rem;
+      height: 3rem;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      background: var(--bh-forest-pale);
+      color: var(--bh-forest);
+  }
+
+  p {
+      margin: 0;
+      color: var(--bh-ink-mid);
+  }

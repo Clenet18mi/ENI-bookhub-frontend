@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, computed } from '@angular/core';
+import { Component, inject, OnInit, signal, computed, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -16,6 +16,9 @@ import { ReservationItem } from '../reservations/reservation.model';
 import { BookService, BookDTO } from '../books/book.service';
 import { SlicePipe } from '@angular/common';
 import { forkJoin } from 'rxjs';
+import { LoansService } from '../loans/services/loans.service';
+import { LoanDialog } from '../loans/components/loan-dialog/loan-dialog';
+import { LoanDialogSuccess } from '../loans/components/loan-dialog-success/loan-dialog-success';
 
 /**
  * Page catalogue — version connectée au backend.
@@ -43,12 +46,15 @@ import { forkJoin } from 'rxjs';
 export class CatalogueComponent implements OnInit {
 
   private readonly reservationsService = inject(ReservationsService);
-  private readonly bookService         = inject(BookService);
-  private readonly snackBar            = inject(MatSnackBar);
+  private readonly bookService = inject(BookService);
+  private readonly snackBar = inject(MatSnackBar);
+  private readonly loanService = inject(LoansService);
+  private readonly cdref = inject(ChangeDetectorRef);
+  private readonly dialog = inject(MatDialog);
 
-  readonly books      = signal<BookDTO[]>([]);
-  readonly loading    = signal(true);
-  readonly reserving  = signal<number | null>(null);
+  readonly books = signal<BookDTO[]>([]);
+  readonly loading = signal(true);
+  readonly reserving = signal<number | null>(null);
 
   /**
    * Set des bookId pour lesquels l'utilisateur a déjà une réservation active
@@ -56,24 +62,28 @@ export class CatalogueComponent implements OnInit {
    */
   readonly reservedBookIds = signal<Set<number>>(new Set());
 
-  query        = '';
-  category     = 'all';
+  isMaxloan: boolean = true;
+  currentLoanCount: number = 0;
+
+  query = '';
+  category = 'all';
   availability = 'all';
-  sortBy       = 'featured';
+  sortBy = 'featured';
 
   // ── Stats calculées ────────────────────────────────────────────────────────
-  readonly totalBooks       = () => this.books().length;
-  readonly availableBooks   = () => this.books().filter(b => b.availableCopies > 0).length;
+  readonly totalBooks = () => this.books().length;
+  readonly availableBooks = () => this.books().filter(b => b.availableCopies > 0).length;
   readonly unavailableBooks = () => this.books().filter(b => b.availableCopies === 0).length;
-  readonly categories       = () => [...new Set(this.books().map(b => b.category).filter(Boolean))] as string[];
+  readonly categories = () => [...new Set(this.books().map(b => b.category).filter(Boolean))] as string[];
 
   ngOnInit(): void {
     // Charge livres ET réservations en parallèle pour savoir lesquels sont déjà réservés
     forkJoin({
-      books:        this.bookService.getBooks(),
+      books: this.bookService.getBooks(),
       reservations: this.reservationsService.getMyReservations(),
+      loanCount: this.loanService.getLoanCount()
     }).subscribe({
-      next: ({ books, reservations }) => {
+      next: ({ books, reservations, loanCount }) => {
         this.books.set(books);
 
         // Construire le set des bookId déjà réservés (statuts actifs uniquement)
@@ -84,6 +94,8 @@ export class CatalogueComponent implements OnInit {
             .map((r: ReservationItem) => r.bookId)
         );
         this.reservedBookIds.set(ids);
+        this.currentLoanCount = loanCount;
+        this.isMaxloan = loanCount >= 3;
         this.loading.set(false);
       },
       error: () => this.loading.set(false),
@@ -98,12 +110,12 @@ export class CatalogueComponent implements OnInit {
           .some(v => v.toLowerCase().includes(q));
         const matchCat = this.category === 'all' || book.category === this.category;
         const matchAvail = this.availability === 'all'
-          || (this.availability === 'available'   && book.availableCopies > 0)
+          || (this.availability === 'available' && book.availableCopies > 0)
           || (this.availability === 'unavailable' && book.availableCopies === 0);
         return matchQ && matchCat && matchAvail;
       });
 
-      if (this.sortBy === 'title')  list = [...list].sort((a, b) => a.title.localeCompare(b.title));
+      if (this.sortBy === 'title') list = [...list].sort((a, b) => a.title.localeCompare(b.title));
       if (this.sortBy === 'rating') list = [...list].sort((a, b) => b.averageRating - a.averageRating);
       return list;
     };
@@ -139,6 +151,62 @@ export class CatalogueComponent implements OnInit {
         const msg = err?.error?.detail ?? 'Impossible de réserver ce livre. Réessayez.';
         this.snackBar.open(msg, 'Fermer', { duration: 5000, panelClass: ['snack-error'] });
       },
+    });
+  }
+
+  createLoan(book: BookDTO): void {
+    const creationDate = new Date();
+    const dueDate = new Date();
+    dueDate.setDate(creationDate.getDate() + 14);
+
+    const dialogRef = this.dialog.open(LoanDialog, {
+      width: '650px',
+      data: {
+        book: book,
+        preview: {
+          startDate: creationDate.toISOString(),
+          endDate: dueDate.toISOString()
+        }
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (confirmed) {
+        this.loanService.createLoan(book.id).subscribe({
+          next: (response) => {
+
+            book.availableCopies--;
+            this.currentLoanCount++;
+            this.isMaxloan = this.currentLoanCount >= 3;
+
+            const successRef = this.dialog.open(LoanDialogSuccess, {
+              width: '400px',
+              data: {
+                bookTitle: book.title,
+                dueDate: response.returnDate || dueDate
+              }
+            });
+
+            successRef.afterClosed().subscribe(() => {
+              this.refreshUserStats();
+            })
+          },
+          error: (err) => {
+            this.snackBar.open("Erreur : " + (err.error?.message || "Action impossible"), "Fermer");
+          }
+        });
+      }
+    });
+  }
+
+  refreshUserStats(): void {
+    this.loanService.getLoanCount().subscribe({
+      next: (count) => {
+        this.currentLoanCount = count;
+        this.isMaxloan = count >= 3;
+        this.cdref.markForCheck();
+      },
+      error: (err) => console.error("Erreur refresh stats", err)
     });
   }
 
