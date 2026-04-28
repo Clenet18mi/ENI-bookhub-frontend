@@ -1,0 +1,12 @@
+<h2 mat-dialog-title>Demande d'emprunt confirmée</h2>
+<mat-dialog-content class="content">
+    <div class="success-badge"><mat-icon>check_circle</mat-icon></div>
+    <p>L'emprunt de <strong>{{ data.bookTitle }}</strong> est en attente de confimation.</p>
+    <div class="due-date-box">
+        <p>À rapporter au plus tard le :</p>
+        <h3>{{ data.dueDate | date:'fullDate':'':'fr-FR' }}</h3>
+    </div>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+    <button mat-flat-button color="primary" mat-dialog-close>Fermer</button>
+</mat-dialog-actions>
