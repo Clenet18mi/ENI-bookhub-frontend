@@ -1,0 +1,27 @@
+<div class="add-book-container">
+  <form [formGroup]="form" (ngSubmit)="submit()" class="auth-form">
+    <div class="name-grid">
+      <mat-form-field appearance="outline">
+        <mat-label>Titre de l'ouvrage</mat-label>
+        <input matInput formControlName="title" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Auteur</mat-label>
+        <input matInput formControlName="author" />
+      </mat-form-field>
+    </div>
+    <div class="name-grid">
+      <mat-form-field appearance="outline">
+        <mat-label>ISBN (Optionnel)</mat-label>
+        <input matInput formControlName="isbn" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Quantité</mat-label>
+        <input matInput type="number" formControlName="totalCopies" />
+      </mat-form-field>
+    </div>
+    <button mat-flat-button color="primary" type="submit" class="auth-submit">
+      <mat-icon>add</mat-icon> Ajouter au catalogue
+    </button>
+  </form>
+</div>
