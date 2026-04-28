@@ -3,20 +3,19 @@
   min-height: 100vh;
 }
 
-.auth-shell {
+.home-shell {
   min-height: 100vh;
   display: grid;
   grid-template-columns: 1.15fr 0.85fr;
+  gap: 2rem;
+  align-items: center;
+  padding: 5rem 4rem;
   background:
     radial-gradient(circle at top right, rgba(31, 77, 58, 0.14), transparent 28%),
     linear-gradient(135deg, #faf8f4 0%, #f4efe6 100%);
 }
 
-.auth-hero {
-  padding: 5rem 4rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+.home-hero {
   max-width: 720px;
 }
 
@@ -44,13 +43,13 @@
   font-size: 2rem;
   line-height: 1;
 }
+
 .brand-link {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
   color: inherit;
   text-decoration: none;
+  width: fit-content;
 }
+
 .brand-name span {
   color: var(--bh-amber);
 }
@@ -62,7 +61,7 @@
 
 h1 {
   font-family: 'DM Serif Display', Georgia, serif;
-  font-size: clamp(2.5rem, 5vw, 4.8rem);
+  font-size: clamp(2.6rem, 5vw, 5rem);
   line-height: 0.98;
   margin: 0 0 1.25rem;
   max-width: 12ch;
@@ -74,6 +73,19 @@ p {
   font-size: 1.05rem;
   line-height: 1.7;
   max-width: 58ch;
+}
+
+.hero-actions {
+  margin-top: 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.hero-actions a {
+  height: 3.2rem;
+  border-radius: 999px;
+  font-weight: 600;
 }
 
 .hero-points {
@@ -99,62 +111,39 @@ p {
   color: var(--bh-forest);
 }
 
-.auth-card {
+.home-card {
   width: min(100%, 460px);
   margin: auto;
+  padding: 2rem;
   border-radius: 28px;
-  padding: 0.5rem;
+  background: #fff;
   box-shadow: 0 24px 60px rgba(26, 26, 26, 0.12);
 }
 
-.auth-card mat-card-header {
-  padding: 1rem 1rem 0;
-}
-
-.auth-card mat-card-title {
+.home-card h2 {
+  margin: 0 0 1rem;
   font-family: 'DM Serif Display', Georgia, serif;
   font-size: 2rem;
 }
 
-.auth-card mat-card-subtitle {
-  color: var(--bh-ink-light);
-}
-
-.auth-form {
-  display: grid;
-  gap: 1rem;
-  padding: 1rem;
-}
-
-.auth-row {
+.card-actions {
+  margin-top: 2rem;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
-.auth-submit {
-  height: 3.2rem;
+.card-actions a {
   border-radius: 999px;
-  font-weight: 600;
-}
-
-.auth-link {
-  color: var(--bh-forest-mid);
-  text-decoration: none;
-  font-weight: 600;
 }
 
 @media (max-width: 960px) {
-  .auth-shell {
+  .home-shell {
     grid-template-columns: 1fr;
+    padding: 2.5rem 1.25rem;
   }
 
-  .auth-hero {
-    padding: 2.5rem 1.25rem 1rem;
-  }
-
-  .auth-card {
-    width: calc(100% - 1.5rem);
-    margin: 0.5rem auto 2rem;
+  .home-card {
+    width: 100%;
   }
 }

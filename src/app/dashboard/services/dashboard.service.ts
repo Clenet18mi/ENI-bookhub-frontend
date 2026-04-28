@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { LoanResponse } from '../models/loan-response.model';
+import { LoanResponse } from '../../loans/models/loan-response.model';
 import { HttpClient } from '@angular/common/http';
 
 export type DashboardStat = {

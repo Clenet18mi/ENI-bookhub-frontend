@@ -1,0 +1,51 @@
+<div class="home-shell">
+  <section class="home-hero">
+    <div class="brand">
+      <a routerLink="/" class="brand brand-link">
+        <div class="brand-mark">B</div>
+        <div>
+          <div class="brand-name">Book<span>Hub</span></div>
+          <div class="brand-tag">Bibliothèque communautaire</div>
+        </div>
+      </a>
+    </div>
+
+    <h1>Explorez votre prochaine lecture.</h1>
+
+    <p>
+      Consultez librement le catalogue, recherchez un livre par titre, auteur ou ISBN,
+      puis connectez-vous pour emprunter ou réserver.
+    </p>
+
+    <div class="hero-actions">
+      <a mat-flat-button color="primary" routerLink="/catalogue">
+        <mat-icon>local_library</mat-icon>
+        Explorer le catalogue
+      </a>
+
+      <a mat-stroked-button routerLink="/login">
+        <mat-icon>login</mat-icon>
+        Se connecter
+      </a>
+    </div>
+
+    <div class="hero-points">
+      <div><mat-icon>book</mat-icon> Catalogue accessible sans compte</div>
+      <div><mat-icon>search</mat-icon> Recherche par titre, auteur ou ISBN</div>
+      <div><mat-icon>verified_user</mat-icon> Réservation après connexion</div>
+    </div>
+  </section>
+
+  <section class="home-card">
+    <h2>Bienvenue sur BookHub</h2>
+    <p>
+      Une plateforme simple pour découvrir les ouvrages disponibles,
+      suivre ses emprunts et gérer les réservations de la bibliothèque.
+    </p>
+
+    <div class="card-actions">
+      <a mat-flat-button color="primary" routerLink="/catalogue">Voir les livres</a>
+      <a mat-button routerLink="/register">Créer un compte</a>
+    </div>
+  </section>
+</div>

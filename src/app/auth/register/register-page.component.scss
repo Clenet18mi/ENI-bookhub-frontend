@@ -29,7 +29,13 @@
   gap: 1rem;
   margin-bottom: 3rem;
 }
-
+.brand-link {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: inherit;
+  text-decoration: none;
+}
 .brand-mark {
   width: 3.5rem;
   height: 3.5rem;

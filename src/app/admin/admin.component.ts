@@ -38,7 +38,6 @@ import { BookManagementComponent } from './book-management/book-management.compo
     MatSelectModule, MatFormFieldModule, MatInputModule,
     MatProgressSpinnerModule, MatSnackBarModule, MatTooltipModule,
     MatDialogModule, MatTabsModule, MatBadgeModule, MatDividerModule,
-    AddBookComponent, BookManagementComponent // AJOUTÉS ICI
   ],
   templateUrl: './admin.component.html',
   styleUrl: './admin.component.scss',
@@ -49,10 +48,10 @@ export class AdminComponent implements OnInit {
 
   readonly adminService = inject(AdminService);
   private readonly snackBar = inject(MatSnackBar);
-  private readonly dialog   = inject(MatDialog);
+  private readonly dialog = inject(MatDialog);
 
-  readonly loading  = signal(false);
-  readonly error    = signal<string | null>(null);
+  readonly loading = signal(false);
+  readonly error = signal<string | null>(null);
 
   searchQuery = '';
   activeRoleFilter = signal<string>('all');
@@ -60,13 +59,13 @@ export class AdminComponent implements OnInit {
   currentUserId: number | null = null;
 
 
-  readonly selectedUser         = signal<AdminUser | null>(null);
-  readonly userLoans            = signal<AdminLoan[]>([]);
-  readonly userReservations     = signal<AdminReservation[]>([]);
-  readonly loansLoading         = signal(false);
-  readonly loansError           = signal<string | null>(null);
-  readonly reservationsLoading  = signal(false);
-  readonly reservationsError    = signal<string | null>(null);
+  readonly selectedUser = signal<AdminUser | null>(null);
+  readonly userLoans = signal<AdminLoan[]>([]);
+  readonly userReservations = signal<AdminReservation[]>([]);
+  readonly loansLoading = signal(false);
+  readonly loansError = signal<string | null>(null);
+  readonly reservationsLoading = signal(false);
+  readonly reservationsError = signal<string | null>(null);
 
   readonly stats = this.adminService.stats;
 
@@ -94,7 +93,7 @@ export class AdminComponent implements OnInit {
   reload(): void {
     this.loading.set(true);
     this.error.set(null);
-    this.adminService.loadStats().subscribe({ error: () => {} });
+    this.adminService.loadStats().subscribe({ error: () => { } });
     this.adminService.loadUsers().subscribe({
       next: () => this.loading.set(false),
       error: (err) => {
