@@ -29,4 +29,25 @@ describe('ProfileService', () => {
     expect(req.request.method).toBe('PATCH');
     req.flush({ id: 1, firstName: 'Ada', lastName: 'Lovelace', email: 'ada@example.com', phone: null, role: 'ROLE_USER', createdAt: '2026-01-01', updatedAt: null });
   });
+
+  it('changes password', () => {
+    service.changePassword({ currentPassword: 'old', newPassword: 'Newpass1!' }).subscribe();
+    const req = httpMock.expectOne('users/me/password');
+    expect(req.request.method).toBe('PATCH');
+    req.flush(null);
+  });
+
+  it('checks active reservations', () => {
+    service.hasActiveReservations().subscribe();
+    const req = httpMock.expectOne('users/me/has-active-reservations');
+    expect(req.request.method).toBe('GET');
+    req.flush({ hasActive: true });
+  });
+
+  it('deletes account', () => {
+    service.deleteAccount().subscribe();
+    const req = httpMock.expectOne('users/me');
+    expect(req.request.method).toBe('DELETE');
+    req.flush(null);
+  });
 });

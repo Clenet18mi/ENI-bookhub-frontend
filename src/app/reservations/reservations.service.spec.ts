@@ -29,4 +29,11 @@ describe('ReservationsService', () => {
     expect(req.request.method).toBe('GET');
     req.flush([]);
   });
+
+  it('cancels a reservation', () => {
+    service.cancelReservation(3).subscribe();
+    const req = httpMock.expectOne('reservations/3');
+    expect(req.request.method).toBe('DELETE');
+    req.flush(null);
+  });
 });

@@ -5,8 +5,12 @@ import { AuthService } from '../auth/auth.service';
 import { ProfileService } from '../profile/profile.service';
 
 describe('adminGuard', () => {
-  const tree = { url: '/login' } as never;
-  const router = { createUrlTree: jasmine.createSpy('createUrlTree').and.returnValue(tree) };
+  const loginTree = { url: '/login' } as never;
+  const dashboardTree = { url: '/dashboard' } as never;
+  const router = { createUrlTree: jasmine.createSpy('createUrlTree').and.callFake((args: string[]) => {
+    if (args[0] === '/login') return loginTree;
+    return dashboardTree;
+  }) };
   const auth = { hasValidSession: jasmine.createSpy('hasValidSession') };
   const profile = {
     currentProfile: jasmine.createSpy('currentProfile'),
@@ -34,6 +38,24 @@ describe('adminGuard', () => {
     const result = await TestBed.runInInjectionContext(() => adminGuard({} as never, {} as never));
 
     expect(profile.getProfile).not.toHaveBeenCalled();
-    expect(result as never).toBe(tree);
+    expect(result as never).toBe(loginTree);
+  });
+
+  it('allows admin access when profile is admin', async () => {
+    auth.hasValidSession.and.returnValue(true);
+    profile.currentProfile.and.returnValue({ role: 'ROLE_ADMIN' });
+
+    const result = await TestBed.runInInjectionContext(() => adminGuard({} as never, {} as never));
+
+    expect(result).toBeTrue();
+  });
+
+  it('redirects to dashboard when role is insufficient', async () => {
+    auth.hasValidSession.and.returnValue(true);
+    profile.currentProfile.and.returnValue({ role: 'ROLE_USER' });
+
+    const result = await TestBed.runInInjectionContext(() => adminGuard({} as never, {} as never));
+
+    expect(result as never).toBe(dashboardTree);
   });
 });

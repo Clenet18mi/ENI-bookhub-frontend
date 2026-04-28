@@ -37,6 +37,15 @@ describe('AuthService', () => {
     expect(service.getRole()).toBe('ROLE_USER');
   });
 
+  it('registers a user', () => {
+    service.register({ firstName: 'Ada', lastName: 'Lovelace', email: 'ada@example.com', password: 'Password1!' }).subscribe();
+
+    const req = httpMock.expectOne('auth/register');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body.firstName).toBe('Ada');
+    req.flush({ ok: true });
+  });
+
   it('returns null for expired sessions', () => {
     service.saveSession({
       accessToken: 'expired',
@@ -58,5 +67,13 @@ describe('AuthService', () => {
     expect(localStorage.getItem('bookhub_session')).toBeNull();
     expect(localStorage.getItem('bookhub_other')).toBeNull();
     expect(localStorage.getItem('unrelated')).toBe('z');
+  });
+
+  it('clears session on logout', () => {
+    localStorage.setItem('bookhub_session', 'x');
+
+    service.logout();
+
+    expect(localStorage.getItem('bookhub_session')).toBeNull();
   });
 });
