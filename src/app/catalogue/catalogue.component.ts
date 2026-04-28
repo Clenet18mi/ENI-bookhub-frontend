@@ -43,12 +43,12 @@ import { forkJoin } from 'rxjs';
 export class CatalogueComponent implements OnInit {
 
   private readonly reservationsService = inject(ReservationsService);
-  private readonly bookService         = inject(BookService);
-  private readonly snackBar            = inject(MatSnackBar);
+  private readonly bookService = inject(BookService);
+  private readonly snackBar = inject(MatSnackBar);
 
-  readonly books      = signal<BookDTO[]>([]);
-  readonly loading    = signal(true);
-  readonly reserving  = signal<number | null>(null);
+  readonly books = signal<BookDTO[]>([]);
+  readonly loading = signal(true);
+  readonly reserving = signal<number | null>(null);
 
   /**
    * Set des bookId pour lesquels l'utilisateur a déjà une réservation active
@@ -56,21 +56,21 @@ export class CatalogueComponent implements OnInit {
    */
   readonly reservedBookIds = signal<Set<number>>(new Set());
 
-  query        = '';
-  category     = 'all';
+  query = '';
+  category = 'all';
   availability = 'all';
-  sortBy       = 'featured';
+  sortBy = 'featured';
 
   // ── Stats calculées ────────────────────────────────────────────────────────
-  readonly totalBooks       = () => this.books().length;
-  readonly availableBooks   = () => this.books().filter(b => b.availableCopies > 0).length;
+  readonly totalBooks = () => this.books().length;
+  readonly availableBooks = () => this.books().filter(b => b.availableCopies > 0).length;
   readonly unavailableBooks = () => this.books().filter(b => b.availableCopies === 0).length;
-  readonly categories       = () => [...new Set(this.books().map(b => b.category).filter(Boolean))] as string[];
+  readonly categories = () => [...new Set(this.books().map(b => b.category).filter(Boolean))] as string[];
 
   ngOnInit(): void {
     // Charge livres ET réservations en parallèle pour savoir lesquels sont déjà réservés
     forkJoin({
-      books:        this.bookService.getBooks(),
+      books: this.bookService.getBooks(),
       reservations: this.reservationsService.getMyReservations(),
     }).subscribe({
       next: ({ books, reservations }) => {
@@ -98,12 +98,12 @@ export class CatalogueComponent implements OnInit {
           .some(v => v.toLowerCase().includes(q));
         const matchCat = this.category === 'all' || book.category === this.category;
         const matchAvail = this.availability === 'all'
-          || (this.availability === 'available'   && book.availableCopies > 0)
+          || (this.availability === 'available' && book.availableCopies > 0)
           || (this.availability === 'unavailable' && book.availableCopies === 0);
         return matchQ && matchCat && matchAvail;
       });
 
-      if (this.sortBy === 'title')  list = [...list].sort((a, b) => a.title.localeCompare(b.title));
+      if (this.sortBy === 'title') list = [...list].sort((a, b) => a.title.localeCompare(b.title));
       if (this.sortBy === 'rating') list = [...list].sort((a, b) => b.averageRating - a.averageRating);
       return list;
     };

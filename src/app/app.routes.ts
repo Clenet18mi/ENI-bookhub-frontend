@@ -23,7 +23,7 @@ export const routes: Routes = [
       },
       {
         path: 'loans',
-        loadComponent: () => import('./loans/loans.component').then((m) => m.LoansComponent),
+        loadComponent: () => import('./loans/components/loan-component/loans.component').then((m) => m.LoansComponent),
       },
       {
         path: 'reservations',

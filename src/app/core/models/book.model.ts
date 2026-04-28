@@ -4,6 +4,8 @@ export interface Book {
   author: string;
   isbn?: string;
   category?: string;
+  description?: string;
+  averageRating?: number;
   totalCopies: number;
   availableCopies?: number;
 }
