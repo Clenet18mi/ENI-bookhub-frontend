@@ -4,6 +4,7 @@ import {
   inject,
   signal,
   computed,
+  ViewChild,
 } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -24,7 +25,9 @@ import { MatDividerModule } from '@angular/material/divider';
 import { AdminService, AdminUser, AdminStats, UserRole, AdminLoan, AdminReservation } from './admin.service';
 import { ConfirmDialogComponent } from './confirm-dialog.component';
 
-// ─── Composant principal Admin ─────────────────────────────────────────────────
+//
+import { AddBookComponent } from './add-book/add-book.component';
+import { BookManagementComponent } from './book-management/book-management.component';
 
 @Component({
   selector: 'app-admin',
@@ -35,11 +38,15 @@ import { ConfirmDialogComponent } from './confirm-dialog.component';
     MatSelectModule, MatFormFieldModule, MatInputModule,
     MatProgressSpinnerModule, MatSnackBarModule, MatTooltipModule,
     MatDialogModule, MatTabsModule, MatBadgeModule, MatDividerModule,
+    AddBookComponent, BookManagementComponent // AJOUTÉS ICI
   ],
   templateUrl: './admin.component.html',
   styleUrl: './admin.component.scss',
 })
 export class AdminComponent implements OnInit {
+  //
+  @ViewChild('bookList') bookList!: BookManagementComponent;
+
   readonly adminService = inject(AdminService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly dialog   = inject(MatDialog);
@@ -52,7 +59,7 @@ export class AdminComponent implements OnInit {
 
   currentUserId: number | null = null;
 
-  // Panneau détail
+
   readonly selectedUser         = signal<AdminUser | null>(null);
   readonly userLoans            = signal<AdminLoan[]>([]);
   readonly userReservations     = signal<AdminReservation[]>([]);
@@ -111,7 +118,6 @@ export class AdminComponent implements OnInit {
     this.adminService.getUserLoans(user.id).subscribe({
       next: (loans) => { this.userLoans.set(loans); this.loansLoading.set(false); },
       error: (err) => {
-        // Fallback: on affiche un message lisible si l'API n'est pas dispo
         this.loansLoading.set(false);
         this.loansError.set(err?.error?.message ?? 'Impossible de charger les emprunts.');
       },
@@ -153,31 +159,24 @@ export class AdminComponent implements OnInit {
 
   toggleActive(user: AdminUser, activate: boolean): void {
     if (activate) {
-      // Activation simple — pas de vérification nécessaire
       this.openToggleDialog(user, true, false);
       return;
     }
-    // Désactivation : vérifier d'abord les réservations actives
     this.adminService.hasActiveReservations(user.id).subscribe({
       next: ({ hasActive }) => this.openToggleDialog(user, false, hasActive),
-      error: () => this.openToggleDialog(user, false, false), // si erreur, on laisse passer
+      error: () => this.openToggleDialog(user, false, false),
     });
   }
 
   private openToggleDialog(user: AdminUser, activate: boolean, hasActiveReservations: boolean): void {
     const ref = this.dialog.open(ConfirmDialogComponent);
-
     const warningLine = hasActiveReservations
-      ? `
-
-⚠️ Cet utilisateur a des réservations en cours. Elles seront automatiquement annulées.`
+      ? `\n\n⚠️ Cet utilisateur a des réservations en cours. Elles seront automatiquement annulées.`
       : '';
-
     ref.componentInstance.data = {
       title: activate ? 'Activer le compte' : 'Désactiver le compte',
       message: `Voulez-vous ${activate ? 'activer' : 'désactiver'} le compte de ${user.firstName} ${user.lastName} ?${warningLine}`,
     };
-
     ref.afterClosed().subscribe((confirmed) => {
       if (!confirmed) return;
       const call$ = activate

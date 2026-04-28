@@ -1,0 +1,59 @@
+
+table {
+  width: 100%;
+  background: #fff;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(0,0,0,.07);
+  box-shadow: 0 2px 8px rgba(0,0,0,.04);
+  border-spacing: 0;
+
+
+  .mat-header-cell {
+    color: var(--bh-ink-light) !important;
+    font-size: 0.75rem !important;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 1.25rem 1rem !important;
+    border-bottom: 1.5px solid rgba(0,0,0,0.05) !important;
+  }
+
+  /* Style des cellules de données */
+  .mat-cell {
+    padding: 1rem !important;
+    color: var(--bh-ink);
+    font-size: 0.9rem;
+    border-bottom: 1px solid rgba(0,0,0,0.03) !important;
+  }
+
+
+  .mat-row {
+    transition: background 0.15s;
+
+    &:hover {
+      background: rgba(31, 77, 58, 0.04) !important;
+    }
+  }
+}
+
+
+button[color="warn"] {
+  color: #ef4444 !important;
+
+  &:hover {
+    background-color: rgba(239, 68, 68, 0.05) !important;
+  }
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+
+@media (max-width: 640px) {
+  .mat-cell, .mat-header-cell {
+    padding: 0.75rem 0.5rem !important;
+  }
+}
