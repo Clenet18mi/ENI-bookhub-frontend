@@ -19,6 +19,9 @@ import { forkJoin } from 'rxjs';
 import { LoansService } from '../loans/services/loans.service';
 import { LoanDialog } from '../loans/components/loan-dialog/loan-dialog';
 import { LoanDialogSuccess } from '../loans/components/loan-dialog-success/loan-dialog-success';
+import { ProfileService } from '../profile/profile.service';
+import { AddBookDialog } from '../books/components/add-book-dialog/add-book-dialog';
+import { AddBookSuccessDialogComponent } from '../books/components/add-book-success-dialog/add-book-success-dialog';
 
 /**
  * Page catalogue — version connectée au backend.
@@ -51,6 +54,12 @@ export class CatalogueComponent implements OnInit {
   private readonly loanService = inject(LoansService);
   private readonly cdref = inject(ChangeDetectorRef);
   private readonly dialog = inject(MatDialog);
+  private readonly profileService = inject(ProfileService);
+
+  readonly isAdmin = computed(() => this.profileService.currentProfile()?.role === 'ROLE_ADMIN');
+  readonly isLibrarian = computed(() => this.profileService.currentProfile()?.role === 'ROLE_LIBRARIAN');
+  readonly isUser = computed(() => this.profileService.currentProfile()?.role === 'ROLE_USER');
+  readonly userName = computed(() => this.profileService.currentProfile()?.firstName ?? 'vous');
 
   readonly books = signal<BookDTO[]>([]);
   readonly loading = signal(true);
@@ -77,29 +86,43 @@ export class CatalogueComponent implements OnInit {
   readonly categories = () => [...new Set(this.books().map(b => b.category).filter(Boolean))] as string[];
 
   ngOnInit(): void {
-    // Charge livres ET réservations en parallèle pour savoir lesquels sont déjà réservés
-    forkJoin({
-      books: this.bookService.getBooks(),
-      reservations: this.reservationsService.getMyReservations(),
-      loanCount: this.loanService.getLoanCount()
-    }).subscribe({
-      next: ({ books, reservations, loanCount }) => {
-        this.books.set(books);
 
-        // Construire le set des bookId déjà réservés (statuts actifs uniquement)
-        const activeStatuses = new Set(['PENDING', 'AVAILABLE']);
-        const ids = new Set(
-          reservations
-            .filter((r: ReservationItem) => activeStatuses.has(r.status))
-            .map((r: ReservationItem) => r.bookId)
-        );
-        this.reservedBookIds.set(ids);
-        this.currentLoanCount = loanCount;
-        this.isMaxloan = loanCount >= 3;
-        this.loading.set(false);
-      },
-      error: () => this.loading.set(false),
-    });
+    if (this.isUser()) {
+      forkJoin({
+        books: this.bookService.getBooks(),
+        reservations: this.reservationsService.getMyReservations(),
+        loanCount: this.loanService.getLoanCount()
+      }).subscribe({
+        next: ({ books, reservations, loanCount }) => {
+          this.books.set(books);
+
+          // Construire le set des bookId déjà réservés (statuts actifs uniquement)
+          const activeStatuses = new Set(['PENDING', 'AVAILABLE']);
+          const ids = new Set(
+            reservations
+              .filter((r: ReservationItem) => activeStatuses.has(r.status))
+              .map((r: ReservationItem) => r.bookId)
+          );
+          this.reservedBookIds.set(ids);
+          this.currentLoanCount = loanCount;
+          this.isMaxloan = loanCount >= 3;
+          this.loading.set(false);
+        },
+        error: () => this.loading.set(false),
+      });
+    } else {
+      this.bookService.getBooks().subscribe({
+        next: (books) => {
+          this.books.set(books);
+          this.loading.set(false);
+        },
+        error: (err) => {
+          console.error('Error loading books', err);
+          this.loading.set(false);
+        }
+      })
+    }
+
   }
 
   get filteredBooks(): () => BookDTO[] {
@@ -119,6 +142,40 @@ export class CatalogueComponent implements OnInit {
       if (this.sortBy === 'rating') list = [...list].sort((a, b) => b.averageRating - a.averageRating);
       return list;
     };
+  }
+
+  addBook(): void {
+    const dialogRef = this.dialog.open(AddBookDialog, {
+      width: '500px',
+      disableClose: true
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        const bookPayload: Partial<BookDTO> = {
+          ...result,
+          isbn: String(result.isbn),
+          totalCopies: result.totalCopies,
+          availableCopies: result.totalCopies,
+          averageRating: 0
+        };
+
+        this.bookService.createBook(bookPayload).subscribe({
+          next: (newBook) => {
+            this.books.update(currentBooks => [newBook, ...currentBooks]);
+
+            this.dialog.open(AddBookSuccessDialogComponent, {
+              width: '450px',
+              data: { book: newBook }
+            });
+          },
+          error: (err) => {
+            this.snackBar.open("Erreur lors de la création du livre", "Fermer");
+            console.error("Erreur détaillée:", err);
+          }
+        });
+      }
+    });
   }
 
   isAvailable(book: BookDTO): boolean {
