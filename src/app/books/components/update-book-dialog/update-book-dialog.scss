@@ -1,0 +1,38 @@
+:host {
+    display: block;
+    padding: 8px;
+}
+
+mat-dialog-content {
+    // Éviter que le dialogue soit trop étroit sur mobile
+    min-width: 350px;
+    max-width: 100%;
+}
+
+mat-form-field {
+    width: 100%; // Les champs prennent toute la largeur disponible
+}
+
+.mat-mdc-dialog-actions {
+    padding: 16px 0;
+    gap: 12px;
+}
+
+// Optionnel : Style spécifique pour le bouton d'enregistrement s'il n'est pas géré en global
+.save-button {
+    background-color: #ef6c00 !important;
+    color: white !important;
+
+    &:disabled {
+        background-color: rgba(0, 0, 0, 0.12) !important;
+        color: rgba(0, 0, 0, 0.26) !important;
+    }
+
+    mat-icon {
+        margin-right: 4px;
+    }
+}
+
+textarea {
+    resize: none; // Désactive le redimensionnement manuel car on utilise cdkTextareaAutosize
+}

@@ -1,0 +1,60 @@
+.success-container {
+    padding: 20px;
+    text-align: center;
+
+    .icon-header {
+        margin-bottom: 16px;
+
+        mat-icon {
+            font-size: 64px;
+            height: 64px;
+            width: 64px;
+            color: #2e7d32; // Vert succès
+        }
+    }
+
+    h2 {
+        color: #2c3e50;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .book-preview {
+        background-color: #f8f9fa;
+        border-radius: 12px;
+        padding: 16px;
+        margin: 16px 0;
+        border-left: 4px solid #ef6c00; // Rappel de la couleur orange de modification
+
+        .book-details {
+            text-align: left;
+
+            .label {
+                font-size: 12px;
+                text-transform: uppercase;
+                color: #7f8c8d;
+                margin: 0;
+                letter-spacing: 1px;
+            }
+
+            .value {
+                font-size: 18px;
+                font-weight: 500;
+                color: #2c3e50;
+                margin: 0 0 12px 0;
+            }
+        }
+    }
+
+    .info-text {
+        color: #7f8c8d;
+        font-size: 14px;
+        margin-top: 12px;
+    }
+
+    .success-btn {
+        background-color: #2c3e50; // Bleu foncé élégant pour le bouton final
+        color: white;
+        padding: 0 32px;
+    }
+}

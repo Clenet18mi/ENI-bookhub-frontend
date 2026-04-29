@@ -201,9 +201,9 @@ interface ShellNavItem {
   `],
 })
 export class AppShellComponent implements OnInit {
-  private readonly authService    = inject(AuthService);
+  private readonly authService = inject(AuthService);
   private readonly profileService = inject(ProfileService);
-  private readonly router         = inject(Router);
+  private readonly router = inject(Router);
 
   readonly navItems = computed<ShellNavItem[]>(() => {
     const role = this.profileService.currentProfile()?.role;
@@ -211,32 +211,34 @@ export class AppShellComponent implements OnInit {
     if (role === 'ROLE_ADMIN') {
       return [
         { label: 'Tableau de bord', icon: 'space_dashboard', link: '/dashboard' },
-        { label: 'Utilisateurs',    icon: 'group',            link: '/admin' },
+        { label: 'Utilisateurs', icon: 'group', link: '/admin' },
+        { label: 'Catalogue', icon: 'local_library', link: '/catalogue' },
+
       ];
     }
 
     if (role === 'ROLE_LIBRARIAN') {
       return [
-        { label: 'Tableau de bord', icon: 'space_dashboard',  link: '/dashboard' },
-        { label: 'Catalogue',       icon: 'local_library',    link: '/catalogue' },
-        { label: 'Mes emprunts',    icon: 'calendar_month',   link: '/loans' },
-        { label: 'Réservations',    icon: 'bookmark',         link: '/reservations' },
+        { label: 'Tableau de bord', icon: 'space_dashboard', link: '/dashboard' },
+        { label: 'Catalogue', icon: 'local_library', link: '/catalogue' },
+        { label: 'Emprunts', icon: 'calendar_month', link: '/loans' },
+        { label: 'Réservations', icon: 'bookmark', link: '/reservations' },
       ];
     }
 
     // Lecteur standard
     return [
       { label: 'Tableau de bord', icon: 'space_dashboard', link: '/dashboard' },
-      { label: 'Catalogue',       icon: 'local_library',   link: '/catalogue' },
-      { label: 'Mes emprunts',    icon: 'calendar_month',  link: '/loans' },
-      { label: 'Réservations',    icon: 'bookmark',        link: '/reservations' },
+      { label: 'Catalogue', icon: 'local_library', link: '/catalogue' },
+      { label: 'Mes emprunts', icon: 'calendar_month', link: '/loans' },
+      { label: 'Réservations', icon: 'bookmark', link: '/reservations' },
     ];
   });
 
-  readonly isAdmin     = computed(() => this.profileService.currentProfile()?.role === 'ROLE_ADMIN');
+  readonly isAdmin = computed(() => this.profileService.currentProfile()?.role === 'ROLE_ADMIN');
   readonly isLibrarian = computed(() => this.profileService.currentProfile()?.role === 'ROLE_LIBRARIAN');
 
-  protected isMobile     = typeof window !== 'undefined' ? window.innerWidth < 960 : false;
+  protected isMobile = typeof window !== 'undefined' ? window.innerWidth < 960 : false;
   protected drawerOpened = !this.isMobile;
 
   /** Vrai si l'utilisateur a une session valide — pilote l'affichage sidebar + topbar */
@@ -251,7 +253,7 @@ export class AppShellComponent implements OnInit {
     }
 
     this.profileService.getProfile().subscribe({
-      next: () => {},
+      next: () => { },
       error: () => {
         this.authService.logout();
         this.router.navigateByUrl('/login');
@@ -267,7 +269,7 @@ export class AppShellComponent implements OnInit {
 
   userEmail(): string {
     return this.profileService.currentProfile()?.email
-        ?? this.authService.getSession()?.user.email ?? '';
+      ?? this.authService.getSession()?.user.email ?? '';
   }
 
   userInitials(): string {
@@ -289,7 +291,7 @@ export class AppShellComponent implements OnInit {
 
   @HostListener('window:resize')
   onResize(): void {
-    this.isMobile     = typeof window !== 'undefined' ? window.innerWidth < 960 : false;
+    this.isMobile = typeof window !== 'undefined' ? window.innerWidth < 960 : false;
     this.drawerOpened = !this.isMobile;
   }
 }

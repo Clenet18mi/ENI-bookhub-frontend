@@ -313,27 +313,43 @@ h1 {
     display: grid;
     grid-template-columns: 1.5fr repeat(3, minmax(0, 1fr));
     gap: .9rem;
-    /* On change 'start' par 'stretch' pour que les éléments remplissent la hauteur */
     align-items: stretch;
 }
 
 .add-book-btn {
-    /* 56px correspond à la hauteur exacte d'un mat-form-field outline */
     height: 56px;
     border-radius: 4px;
-    /* Optionnel : pour arrondir un peu plus comme tes cartes */
     font-size: 0.95rem;
     font-weight: 600;
 
-    /* Pour l'icône à l'intérieur */
     mat-icon {
         margin-right: 4px;
     }
 }
 
-/* On s'assure qu'en mobile le bouton prend aussi la bonne taille */
-@media (max-width: 960px) {
-    .add-book-btn {
-        width: 100%;
+.update-button {
+    background-color: #ef6c00 !important;
+    color: white !important;
+
+    &:hover {
+        background-color: #e65100 !important;
+    }
+
+    mat-icon {
+        margin-right: 8px;
+    }
+}
+
+
+.delete-button {
+    background-color: #d32f2f !important;
+    color: white !important;
+
+    &:hover {
+        background-color: #b71c1c !important;
+    }
+
+    mat-icon {
+        margin-right: 8px;
     }
 }

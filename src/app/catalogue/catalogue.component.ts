@@ -27,6 +27,11 @@ import { BookDTO } from '../books/book.service';
 import { LoanDialogSuccess } from '../loans/components/loan-dialog-success/loan-dialog-success';
 import { LoanDialog } from '../loans/components/loan-dialog/loan-dialog';
 
+import { DeleteBookSuccessDialog } from '../books/components/delete-book-dialog-success/delete-book-dialog-success';
+import { DeleteBookDialog } from '../books/components/delete-book-dialog/delete-book-dialog';
+import { UpdateBookDialogSuccess } from '../books/components/update-book-dialog-success/update-book-dialog-success';
+import { UpdateBookDialog } from '../books/components/update-book-dialog/update-book-dialog';
+
 @Component({
   selector: 'app-catalogue',
   standalone: true,
@@ -102,6 +107,11 @@ export class CatalogueComponent implements OnInit {
     return this.authService.getRole() === 'ROLE_LIBRARIAN';
   }
 
+  /** Retourne vrai si l'utilisateur connecté est un admin (ROLE_ADMIN) */
+  isAdmin(): boolean {
+    return this.authService.getRole() === 'ROLE_ADMIN';
+  }
+
   // ── Init ────────────────────────────────────────────────────────────────
   ngOnInit(): void {
     this.isConnected = this.authService.hasValidSession();
@@ -110,8 +120,8 @@ export class CatalogueComponent implements OnInit {
 
   private loadAll(): void {
     const role = this.authService.getRole();
+    this.loading.set(true);
 
-    // CAS 1 : C'est un simple LECTEUR (ROLE_USER)
     if (this.isConnected && role === 'ROLE_USER') {
       forkJoin({
         books: this.bookService.getBooks(),
@@ -128,18 +138,16 @@ export class CatalogueComponent implements OnInit {
           );
           this.loading.set(false);
         },
-        error: () => this.loading.set(false),
+        error: () => this.loading.set(false)
       });
 
-      // CAS 2 : C'est un BIBLIOTHÉCAIRE ou un utilisateur NON CONNECTÉ
     } else {
-      // On ne charge QUE les livres
       this.bookService.getBooks().subscribe({
         next: (list) => {
           this.books.set(list);
           this.loading.set(false);
         },
-        error: () => this.loading.set(false),
+        error: () => this.loading.set(false)
       });
     }
   }
@@ -313,6 +321,79 @@ export class CatalogueComponent implements OnInit {
             const msg = err?.error?.detail ?? 'Erreur lors de l\'emprunt.';
             this.snackBar.open(msg, 'Fermer', { duration: 5000 });
           }
+        });
+      }
+    });
+  }
+
+  delete(book: Book): void {
+    if (!book?.id) return;
+
+    const dialogRef = this.dialog.open(DeleteBookDialog, {
+      width: '400px',
+      data: book
+    });
+
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (confirmed) {
+        this.loading.set(true);
+
+        this.bookService.deleteBook(book.id!).subscribe({
+          next: () => {
+            this.loadAll();
+
+            this.dialog.open(DeleteBookSuccessDialog, {
+              width: '400px',
+              data: { title: book.title }
+            });
+          },
+          error: (err) => {
+            this.loading.set(false);
+            const msg = err?.error?.detail ?? 'Impossible de supprimer ce livre (il est peut-être lié à un emprunt actif).';
+            this.snackBar.open(msg, 'Fermer', { duration: 5000, panelClass: ['snack-error'] });
+          }
+        });
+      }
+    });
+  }
+
+  updateBook(book: Book): void {
+    if (!book?.id) return;
+
+    const dialogRef = this.dialog.open(UpdateBookDialog, {
+      width: '550px',
+      disableClose: true,
+      data: { ...book }
+    });
+
+    dialogRef.afterClosed().subscribe((result: Book) => {
+      if (result) {
+        this.updateBookData(result);
+      }
+    });
+  }
+
+  private updateBookData(updatedBook: Book): void {
+    this.loading.set(true);
+
+    this.bookService.updateBook(updatedBook).subscribe({
+      next: (response) => {
+        this.loading.set(false);
+
+        this.loadAll();
+
+        this.dialog.open(UpdateBookDialogSuccess, {
+          width: '400px',
+          data: { title: response.title }
+        });
+      },
+      error: (err) => {
+        this.loading.set(false);
+        console.error('Erreur lors de la mise à jour:', err);
+        const errorMessage = err?.error?.detail || 'Une erreur est survenue lors de la modification.';
+        this.snackBar.open(errorMessage, 'Fermer', {
+          duration: 5000,
+          panelClass: ['snack-error']
         });
       }
     });
