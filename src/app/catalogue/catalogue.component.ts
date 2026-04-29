@@ -82,6 +82,18 @@ export class CatalogueComponent implements OnInit {
   readonly categories       = () =>
     [...new Set(this.books().map(b => b.category).filter(Boolean))] as string[];
 
+  // ── Rôles ────────────────────────────────────────────────────────────────
+
+  /** Retourne vrai si l'utilisateur connecté est un lecteur (ROLE_USER) */
+  isUser(): boolean {
+    return this.authService.getRole() === 'ROLE_USER';
+  }
+
+  /** Retourne vrai si l'utilisateur connecté est un bibliothécaire (ROLE_LIBRARIAN) */
+  isLibrarian(): boolean {
+    return this.authService.getRole() === 'ROLE_LIBRARIAN';
+  }
+
   // ── Init ────────────────────────────────────────────────────────────────
   ngOnInit(): void {
     this.isConnected = this.authService.hasValidSession();
@@ -163,6 +175,11 @@ export class CatalogueComponent implements OnInit {
       { duration: 5000, panelClass: ['snack-warn'] }
     ).onAction().subscribe(() => this.router.navigate(['/login']));
     return false;
+  }
+
+  /** Naviguer vers la page d'ajout de livre (bibliothécaire) */
+  addBook(): void {
+    this.router.navigate(['/admin/books/add']);
   }
 
   /** US-RESA-01 : réserver un livre indisponible — direct, sans overlay */
