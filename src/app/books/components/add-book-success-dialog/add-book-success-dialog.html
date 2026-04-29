@@ -1,0 +1,35 @@
+<div class="success-container">
+    <div class="icon-header">
+        <mat-icon>check_circle</mat-icon>
+    </div>
+
+    <h2 mat-dialog-title>Livre créé avec succès !</h2>
+
+    <mat-dialog-content>
+        <div class="book-preview">
+            <div class="book-details">
+                <p class="label">Titre</p>
+                <p class="value">{{ data.book.title }}</p>
+
+                <p class="label">Auteur</p>
+                <p class="value">{{ data.book.author }}</p>
+
+                <div class="meta-grid">
+                    <div>
+                        <p class="label">ISBN</p>
+                        <p class="value">{{ data.book.isbn }}</p>
+                    </div>
+                    <div>
+                        <p class="label">Copies</p>
+                        <p class="value">{{ data.book.availableCopies }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <p class="info-text">Le livre est désormais visible dans le catalogue et disponible à l'emprunt.</p>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="center">
+        <button mat-flat-button color="primary" mat-dialog-close>Génial !</button>
+    </mat-dialog-actions>
+</div>
