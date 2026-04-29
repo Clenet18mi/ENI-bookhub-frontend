@@ -1,0 +1,50 @@
+<h2 mat-dialog-title>Ajouter un nouveau livre</h2>
+<mat-dialog-content [formGroup]="bookForm">
+    <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 10px;">
+
+        <mat-form-field appearance="outline">
+            <mat-label>Titre</mat-label>
+            <input matInput formControlName="title" placeholder="Ex: Le Petit Prince">
+            <mat-error *ngIf="bookForm.get('title')?.hasError('required')">Le titre est obligatoire</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+            <mat-label>Auteur</mat-label>
+            <input matInput formControlName="author" placeholder="Ex: Antoine de Saint-Exupéry">
+            <mat-error *ngIf="bookForm.get('author')?.hasError('required')">L'auteur est obligatoire</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+            <mat-label>Catégorie</mat-label>
+            <input matInput formControlName="category" placeholder="Ex: Fiction">
+            <mat-error *ngIf="bookForm.get('author')?.hasError('required')">La catégorie est obligatoire</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+            <mat-label>ISBN</mat-label>
+            <input matInput type="number" formControlName="isbn" placeholder="Ex: 9782070408504"
+                (keydown)="onNumberOnly($event)">
+            <mat-error *ngIf="bookForm.get('isbn')?.hasError('pattern')">L'ISBN doit contenir uniquement des
+                chiffres</mat-error>
+            <mat-error *ngIf="bookForm.get('isbn')?.hasError('required')">L'ISBN est obligatoire</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+            <mat-label>Nombre d'exemplaires</mat-label>
+            <input matInput type="number" formControlName="totalCopies" (keydown)="onNumberOnly($event)">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+            <mat-label>Description</mat-label>
+            <textarea matInput formControlName="description" placeholder="Résumé du livre..." rows="3"
+                cdkTextareaAutosize #autosize="cdkTextareaAutosize"></textarea>
+        </mat-form-field>
+    </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()">Annuler</button>
+    <button mat-flat-button color="primary" [disabled]="bookForm.invalid" (click)="onConfirm()">
+        <mat-icon>check</mat-icon> Créer le livre
+    </button>
+</mat-dialog-actions>

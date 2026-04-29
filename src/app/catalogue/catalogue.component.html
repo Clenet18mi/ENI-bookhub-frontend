@@ -60,6 +60,15 @@
                 <mat-option value="rating">Note ↓</mat-option>
             </mat-select>
         </mat-form-field>
+        @if (isLibrarian()) {
+        <mat-form-field appearance="outline" class="add-book-field">
+            <button mat-button class="fake-input-button" class="green-button" (click)="addBook()">
+                <mat-icon>add</mat-icon>
+                Ajouter un livre
+            </button>
+            <input matInput style="display: none;">
+        </mat-form-field>
+        }
     </section>
 
     <!-- Résultats -->
@@ -112,6 +121,7 @@
                     }
                 </div>
 
+                @if(isUser()) {
                 <div class="actions">
                     @if (isAvailable(book)) {
                     <span [matTooltip]="isMaxloan ? 'Vous avez atteint la limite de 3 emprunts' : ''">
@@ -148,6 +158,7 @@
                     </button>
                     }
                 </div>
+                }
             </div>
         </mat-card>
         }

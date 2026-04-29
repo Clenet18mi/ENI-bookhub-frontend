@@ -23,7 +23,7 @@ export class BookService {
   /** GET /api/books */
   getBooks(search?: string, category?: string): Observable<BookDTO[]> {
     let params = new HttpParams();
-    if (search)   params = params.set('search', search);
+    if (search) params = params.set('search', search);
     if (category) params = params.set('category', category);
     return this.http.get<BookDTO[]>('books', { params });
   }
@@ -31,5 +31,9 @@ export class BookService {
   /** GET /api/books/{id} */
   getBook(id: number): Observable<BookDTO> {
     return this.http.get<BookDTO>(`books/${id}`);
+  }
+
+  createBook(bookData: any): Observable<BookDTO> {
+    return this.http.post<BookDTO>(`books/create`, bookData);
   }
 }
