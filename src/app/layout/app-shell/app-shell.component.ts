@@ -61,19 +61,6 @@ interface ShellNavItem {
           }
         </nav>
 
-        <!-- Profil sidebar -->
-        <div class="sidebar-profile">
-          <a class="sidebar-profile-chip" routerLink="/profile">
-            <div class="avatar">{{ userInitials() }}</div>
-            <div class="profile-meta">
-              <strong>{{ userLabel() }}</strong>
-              <span>{{ userEmail() }}</span>
-            </div>
-          </a>
-          <button mat-icon-button class="logout-icon-btn" (click)="logout()" aria-label="Déconnexion">
-            <mat-icon>logout</mat-icon>
-          </button>
-        </div>
 
       </mat-sidenav>
 
