@@ -358,7 +358,8 @@
 </section>
 } @else {
 <!-- ════════════════════════════════════════════════════════════════════ -->
-<!-- DASHBOARD LECTEUR                                 -->
+<!-- DASHBOARD LECTEUR — données réelles depuis /api/loans/my et        -->
+<!--                     /api/reservations/my                            -->
 <!-- ════════════════════════════════════════════════════════════════════ -->
 <section class="dashboard">
   <header class="dashboard-hero">
@@ -379,8 +380,17 @@
     </div>
   </header>
 
+  <!-- ── Chargement ─────────────────────────────────────────────────── -->
+  @if (userLoading()) {
+  <div class="loading-overlay">
+    <mat-spinner diameter="40" />
+    <p>Chargement de vos données…</p>
+  </div>
+  } @else {
+
+  <!-- ── KPIs ───────────────────────────────────────────────────────── -->
   <section class="stats-grid" aria-label="Indicateurs principaux">
-    @for (stat of stats; track stat.label) {
+    @for (stat of userStats(); track stat.label) {
     <mat-card class="stat-card" [class]="'tone-' + stat.tone">
       <div class="stat-icon"><mat-icon>{{ stat.icon }}</mat-icon></div>
       <div>
@@ -392,7 +402,10 @@
     }
   </section>
 
+  <!-- ── Contenu principal ─────────────────────────────────────────── -->
   <section class="content-grid">
+
+    <!-- Emprunts en cours -->
     <mat-card class="panel panel-wide">
       <div class="panel-head">
         <div>
@@ -401,24 +414,41 @@
         </div>
         <a mat-button color="primary" routerLink="/loans">Voir tout</a>
       </div>
+
+      @if (recentActiveLoans().length === 0) {
+      <div class="empty-state">
+        <mat-icon>menu_book</mat-icon>
+        <p>Aucun emprunt en cours.</p>
+        <a mat-stroked-button routerLink="/catalogue">Parcourir le catalogue</a>
+      </div>
+      } @else {
       <div class="loan-list">
-        @for (loan of recentLoans; track loan.title) {
+        @for (loan of recentActiveLoans(); track loan.id) {
         <article class="loan-item">
           <div class="book-cover" aria-hidden="true"><mat-icon>auto_stories</mat-icon></div>
           <div class="loan-copy">
-            <h3>{{ loan.title }}</h3>
-            <p>{{ loan.author }}</p>
+            <h3>{{ loan.bookTitle }}</h3>
+            <p>{{ loan.bookAuthor }}</p>
             <div class="loan-meta">
-              <span>Retour prévu : {{ loan.due }}</span>
-              <span [class.late]="loan.statusTone === 'late'">{{ loan.status }}</span>
+              <span>Retour prévu : {{ formatDueDate(loan.dueDate) }}</span>
+              <span [class.late]="loan.status === 'OVERDUE'">
+                {{ loanStatusLabel(loan.status) }}
+                @if (loan.status === 'OVERDUE') {
+                  — {{ -calculateDaysRemaining(loan.dueDate) }} j de retard
+                } @else if (loan.status === 'ACTIVE') {
+                  — {{ calculateDaysRemaining(loan.dueDate) }} j restants
+                }
+              </span>
             </div>
           </div>
         </article>
         @if (!$last) { <mat-divider></mat-divider> }
         }
       </div>
+      }
     </mat-card>
 
+    <!-- Réservations actives -->
     <mat-card class="panel">
       <div class="panel-head">
         <div>
@@ -426,17 +456,26 @@
           <span class="section-subtitle">Votre file d'attente en temps réel</span>
         </div>
       </div>
+
+      @if (activeReservations().length === 0) {
+      <div class="empty-state">
+        <mat-icon>bookmark_border</mat-icon>
+        <p>Aucune réservation active.</p>
+      </div>
+      } @else {
       <div class="reservation-list">
-        @for (reservation of reservations; track reservation.title) {
-        <article class="reservation-item">
+        @for (reservation of activeReservations(); track reservation.id) {
+        <article class="reservation-item" [class.available]="reservation.status === 'AVAILABLE'">
           <div>
-            <h3>{{ reservation.title }}</h3>
-            <p>{{ reservation.author }}</p>
+            <h3>{{ reservation.bookTitle }}</h3>
+            <p>{{ reservation.bookAuthor }}</p>
           </div>
           <div class="reservation-footer">
-            <strong>{{ reservation.availability }}</strong>
+            <strong [class.available-label]="reservation.status === 'AVAILABLE'">
+              {{ reservationStatusLabel(reservation.status) }}
+            </strong>
             <div class="chip-row">
-              @for (chip of reservation.chips; track chip) {
+              @for (chip of reservationChips(reservation); track chip) {
               <mat-chip>{{ chip }}</mat-chip>
               }
             </div>
@@ -444,7 +483,10 @@
         </article>
         }
       </div>
+      }
     </mat-card>
+
   </section>
+  }
 </section>
 }
