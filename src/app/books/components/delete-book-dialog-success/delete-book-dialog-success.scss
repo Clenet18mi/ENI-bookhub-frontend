@@ -1,0 +1,45 @@
+.success-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 24px 16px;
+
+    // L'icône de succès animée (optionnel)
+    .success-icon {
+        font-size: 64px;
+        height: 64px;
+        width: 64px;
+        color: #2e7d32; // Vert succès
+        margin-bottom: 16px;
+        filter: drop-shadow(0 4px 6px rgba(46, 125, 50, 0.2));
+    }
+
+    h2 {
+        margin: 0;
+        font-family: 'DM Serif Display', serif;
+        font-size: 1.6rem;
+        color: var(--bh-forest, #1f4d3a);
+    }
+
+    mat-dialog-content {
+        margin-top: 12px;
+        font-size: 1rem;
+        color: #666;
+
+        strong {
+            color: #333;
+        }
+    }
+
+    mat-dialog-actions {
+        margin-top: 20px;
+        border: none;
+
+        button {
+            min-width: 120px;
+            border-radius: 999px;
+            background-color: var(--bh-forest, #1f4d3a);
+        }
+    }
+}

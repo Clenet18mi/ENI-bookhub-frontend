@@ -1,0 +1,47 @@
+// Conteneur du titre avec l'icône d'avertissement
+.delete-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #c62828; // Rouge Material "Danger"
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.5rem;
+
+    mat-icon {
+        transform: translateY(-1px);
+    }
+}
+
+// Corps du texte
+mat-dialog-content {
+    padding-top: 10px !important;
+
+    p {
+        line-height: 1.5;
+        color: #444;
+    }
+
+    .warning-text {
+        margin-top: 12px;
+        padding: 10px;
+        background-color: #fff1f0;
+        border-left: 4px solid #ff4d4f;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        color: #851919;
+        font-weight: 500;
+    }
+}
+
+// Actions (boutons)
+mat-dialog-actions {
+    padding: 16px 0 8px 0 !important;
+    gap: 8px;
+
+    button {
+        border-radius: 999px; // Boutons arrondis "Pill"
+        text-transform: uppercase;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+}

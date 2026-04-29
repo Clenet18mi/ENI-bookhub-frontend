@@ -1,0 +1,13 @@
+<h2 mat-dialog-title class="delete-title">
+    <mat-icon color="warn">warning</mat-icon> Supprimer le livre
+</h2>
+
+<mat-dialog-content>
+    <p>Êtes-vous sûr de vouloir supprimer définitivement <strong>"{{ book.title }}"</strong> ?</p>
+    <p class="warning-text">Cette action est irréversible et supprimera toutes les données associées.</p>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close>Annuler</button>
+    <button mat-flat-button color="warn" (click)="onConfirm()">Supprimer définitivement</button>
+</mat-dialog-actions>

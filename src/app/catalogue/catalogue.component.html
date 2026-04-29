@@ -150,6 +150,20 @@
                     </button>
                     }
                 </div>
+                } @else if(isLibrarian()) {
+                <div class="actions admin-actions">
+                    <button mat-stroked-button class="update-button" (click)="updateBook(book)">
+                        <mat-icon>edit</mat-icon>
+                        Modifier
+                    </button>
+                </div>
+                } @else if(isAdmin()) {
+                <div class="actions admin-actions">
+                    <button mat-flat-button class="delete-button" (click)="delete(book)">
+                        <mat-icon>delete_forever</mat-icon>
+                        Supprimer
+                    </button>
+                </div>
                 }
             </div>
         </mat-card>

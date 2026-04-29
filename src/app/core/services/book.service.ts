@@ -61,11 +61,15 @@ export class BookService {
 
 
   deleteBook(id: number): Observable<void> {
-    return this.http.delete<void>(`books/${id}`);
+    return this.http.delete<void>(`books/${id}/delete`);
   }
 
 
   createBook(bookData: BookDTO): Observable<BookDTO> {
     return this.http.post<BookDTO>(`books/create`, bookData);
+  }
+
+  updateBook(book: Book): Observable<Book> {
+    return this.http.put<Book>(`books/${book.id}/update`, book);
   }
 }
