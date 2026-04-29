@@ -8,6 +8,7 @@ export interface Book {
   averageRating?: number;
   totalCopies: number;
   availableCopies?: number;
+  coverUrl?: string | null;
 }
 
 export interface Review {

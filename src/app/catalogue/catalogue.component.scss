@@ -254,3 +254,54 @@ h1 {
         }
     }
 }
+/* ── Mini-header visiteur (non connecté) ─────────────────────────── */
+.catalogue-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    background: rgba(255,255,255,.92);
+    border-radius: 1.25rem;
+    border: 1px solid rgba(26,26,26,.07);
+    backdrop-filter: blur(10px);
+}
+
+.brand-link {
+    display: flex;
+    align-items: center;
+    gap: .9rem;
+    text-decoration: none;
+    color: inherit;
+}
+
+.brand-mark {
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: .875rem;
+    background: var(--bh-forest, #1f4d3a);
+    color: #fff;
+    display: grid;
+    place-items: center;
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 1.25rem;
+}
+
+.brand-name {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 1.5rem;
+    line-height: 1;
+}
+
+.brand-name span { color: var(--bh-amber, #e6820a); }
+
+.brand-tag {
+    font-size: .8rem;
+    color: var(--bh-ink-light, #888);
+}
+
+.topbar-actions {
+    display: flex;
+    gap: .5rem;
+    align-items: center;
+}

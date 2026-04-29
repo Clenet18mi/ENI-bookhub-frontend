@@ -1,566 +1,149 @@
-import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, inject, OnInit, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
-import { Book } from '../core/models/book.model';
-import { BookService } from '../core/services/book.service';
-import { ReservationDialogComponent } from './reservation-dialog.component';
-import { ReservationSuccessDialogComponent } from './reservation-success-dialog.component';
-import { ReservationBookStatus, ReservationBookSummary, ReservationService } from './reservation.service';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { SlicePipe } from '@angular/common';
+import { forkJoin } from 'rxjs';
 
-type BookCard = ReservationBookSummary & {
-  id?: number;
-  rating: number;
-  summary: string;
-};
+import { BookService } from '../core/services/book.service';
+import { Book } from '../core/models/book.model';
+import { ReservationsService } from '../reservations/reservations.service';
+import { ReservationItem } from '../reservations/reservation.model';
+import { LoansService } from '../loans/services/loans.service';
+import { AuthService } from '../auth/auth.service';
 
 @Component({
   selector: 'app-catalogue',
   standalone: true,
   imports: [
     FormsModule,
-    RouterLink,
     MatButtonModule,
     MatCardModule,
     MatChipsModule,
-    MatDialogModule,
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
+    MatProgressSpinnerModule,
     MatSelectModule,
+    MatSnackBarModule,
+    MatTooltipModule,
+    SlicePipe,
   ],
-  template: `
-    <section class="catalogue-page">
-      <header class="catalogue-topbar">
-        <a routerLink="/" class="brand-link">
-          <div class="brand-mark">B</div>
-          <div>
-            <div class="brand-name">Book<span>Hub</span></div>
-            <div class="brand-tag">Bibliothèque communautaire</div>
-          </div>
-        </a>
-
-        <div class="topbar-actions">
-          <a mat-button routerLink="/">Accueil</a>
-          <a mat-stroked-button routerLink="/login">Connexion</a>
-        </div>
-      </header>
-
-      <header class="hero">
-        <div>
-          <p class="eyebrow">Catalogue BookHub</p>
-          <h1>Explorer, réserver et lire plus facilement.</h1>
-          <p class="lead">
-            Parcourez le fonds, filtrez par disponibilité et réservez un livre selon le créneau proposé.
-          </p>
-        </div>
-
-        <div class="hero-stats">
-          <div><strong>{{ books.length }}</strong><span>livres visibles</span></div>
-          <div><strong>{{ availableCount }}</strong><span>disponibles</span></div>
-          <div><strong>{{ unavailableCount }}</strong><span>réservables</span></div>
-        </div>
-      </header>
-
-      <section class="filters" aria-label="Filtres du catalogue">
-        <mat-form-field appearance="outline" class="search-field">
-          <mat-label>Rechercher un livre</mat-label>
-          <input
-            matInput
-            [(ngModel)]="query"
-            (ngModelChange)="loadBooks()"
-            placeholder="Titre, auteur, ISBN"
-          />
-          <mat-icon matSuffix>search</mat-icon>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Catégorie</mat-label>
-          <mat-select [(ngModel)]="category" (selectionChange)="loadBooks()">
-            <mat-option value="all">Toutes</mat-option>
-            @for (item of categories; track item) {
-              <mat-option [value]="item">{{ item }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Disponibilité</mat-label>
-          <mat-select [(ngModel)]="availability" (selectionChange)="loadBooks()">
-            <mat-option value="all">Toutes</mat-option>
-            <mat-option value="available">Disponibles</mat-option>
-            <mat-option value="loaned">Indisponibles</mat-option>
-          </mat-select>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Trier</mat-label>
-          <mat-select [(ngModel)]="sortBy" (selectionChange)="loadBooks()">
-            <mat-option value="featured">A → Z</mat-option>
-            <mat-option value="title_desc">Z → A</mat-option>
-            <mat-option value="rating_desc">Meilleures notes</mat-option>
-            <mat-option value="rating_asc">Notes croissantes</mat-option>
-            <mat-option value="date_desc">Plus récents</mat-option>
-            <mat-option value="date_asc">Plus anciens</mat-option>
-          </mat-select>
-        </mat-form-field>
-      </section>
-
-      <section class="results-head">
-        <div>
-          <h2>Résultats</h2>
-          <p>{{ books.length }} livre(s) correspondant à votre recherche.</p>
-        </div>
-
-        <button mat-button type="button" (click)="resetFilters()">
-          <mat-icon>filter_alt_off</mat-icon>
-          Réinitialiser
-        </button>
-      </section>
-
-      <section class="book-list">
-        @for (book of books; track book.id ?? book.title) {
-          <mat-card class="book-card">
-            <div class="cover" aria-hidden="true">
-              <mat-icon>auto_stories</mat-icon>
-            </div>
-
-            <div class="book-body">
-              <div class="book-top">
-                <div>
-                  <h3>{{ book.title }}</h3>
-                  <p>{{ book.author }}</p>
-                </div>
-
-                <span class="rating">
-                  <mat-icon>star</mat-icon>
-                  {{ book.rating.toFixed(1) }}
-                </span>
-              </div>
-
-              <mat-chip>{{ book.category }}</mat-chip>
-              <p class="summary">{{ book.summary }}</p>
-
-              <div class="status-row">
-                <span class="status" [class]="book.status">
-                  {{ statusLabel(book.status) }}
-                </span>
-
-                @if (book.status !== 'available') {
-                  <span class="meta">Retour estimé : {{ book.nextAvailable }}</span>
-                }
-              </div>
-
-              <div class="actions">
-                <button mat-flat-button color="primary" type="button" (click)="openReservation(book)">
-                  <mat-icon>bookmark_add</mat-icon>
-                  Réserver
-                </button>
-
-                @if (book.status !== 'available') {
-                  <button mat-stroked-button disabled>
-                    <mat-icon>schedule</mat-icon>
-                    {{ book.queue }}
-                  </button>
-                }
-              </div>
-            </div>
-          </mat-card>
-        }
-      </section>
-    </section>
-  `,
-  styles: [`
-    :host { display: block; }
-
-    .catalogue-page {
-      min-height: 100vh;
-      display: grid;
-      gap: 1.25rem;
-      padding: 2rem;
-      background:
-        radial-gradient(circle at top right, rgba(31,77,58,.12), transparent 28%),
-        linear-gradient(135deg, #faf8f4 0%, #f4efe6 100%);
-    }
-
-    .catalogue-topbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .brand-link {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      color: inherit;
-      text-decoration: none;
-    }
-
-    .brand-mark {
-      width: 3rem;
-      height: 3rem;
-      border-radius: 1rem;
-      background: var(--bh-forest);
-      color: #fff;
-      display: grid;
-      place-items: center;
-      font-family: 'DM Serif Display', Georgia, serif;
-      font-size: 1.4rem;
-    }
-
-    .brand-name {
-      font-family: 'DM Serif Display', Georgia, serif;
-      font-size: 1.7rem;
-      line-height: 1;
-    }
-
-    .brand-name span {
-      color: var(--bh-amber);
-    }
-
-    .brand-tag {
-      color: var(--bh-ink-light);
-      font-size: .9rem;
-    }
-
-    .topbar-actions {
-      display: flex;
-      gap: .75rem;
-      align-items: center;
-    }
-
-    .hero {
-      display: flex;
-      justify-content: space-between;
-      gap: 1rem;
-      align-items: end;
-      padding: 1.5rem;
-      border-radius: var(--bh-radius-lg);
-      background: linear-gradient(135deg, rgba(31,77,58,.1), rgba(184,92,0,.08)), #fff;
-      border: 1px solid rgba(26,26,26,.06);
-    }
-
-    .eyebrow {
-      margin: 0 0 .35rem;
-      text-transform: uppercase;
-      letter-spacing: .12em;
-      font-size: .78rem;
-      color: var(--bh-forest-mid);
-    }
-
-    h1 {
-      margin: 0;
-      font-family: 'DM Serif Display', Georgia, serif;
-      font-size: clamp(2rem, 4vw, 3.4rem);
-    }
-
-    .lead,
-    .results-head p,
-    .summary,
-    .meta,
-    .book-top p,
-    .hero-stats span {
-      color: var(--bh-ink-mid);
-    }
-
-    .hero-stats {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: .75rem;
-    }
-
-    .hero-stats > div {
-      padding: 1rem;
-      border-radius: var(--bh-radius-md);
-      background: rgba(255,255,255,.75);
-      border: 1px solid rgba(26,26,26,.08);
-      min-width: 110px;
-    }
-
-    .hero-stats strong {
-      display: block;
-      font-size: 1.6rem;
-    }
-
-    .filters {
-      display: grid;
-      grid-template-columns: 1.5fr repeat(3, minmax(0, 1fr));
-      gap: .9rem;
-      align-items: start;
-    }
-
-    .search-field {
-      grid-column: 1 / -1;
-    }
-
-    .results-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .results-head h2 {
-      margin: 0;
-      font-family: 'DM Serif Display', Georgia, serif;
-    }
-
-    .book-list {
-      display: grid;
-      gap: 1rem;
-    }
-
-    .book-card {
-      display: grid;
-      grid-template-columns: 5rem 1fr;
-      gap: 1rem;
-      padding: 1rem;
-      border-radius: var(--bh-radius-lg);
-    }
-
-    .cover {
-      width: 5rem;
-      height: 7rem;
-      border-radius: .95rem;
-      background: linear-gradient(180deg, var(--bh-paper-mid), #fff);
-      display: grid;
-      place-items: center;
-      color: var(--bh-forest-mid);
-    }
-
-    .book-body {
-      display: grid;
-      gap: .75rem;
-    }
-
-    .book-top {
-      display: flex;
-      justify-content: space-between;
-      gap: 1rem;
-      align-items: start;
-    }
-
-    .book-top h3 {
-      margin: 0;
-      font-size: 1.05rem;
-    }
-
-    .rating {
-      display: inline-flex;
-      align-items: center;
-      gap: .25rem;
-      font-weight: 700;
-      color: var(--bh-amber);
-    }
-
-    .summary {
-      margin: 0;
-      line-height: 1.6;
-    }
-
-    .status-row,
-    .actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: .75rem;
-      align-items: center;
-    }
-
-    .status {
-      padding: .45rem .75rem;
-      border-radius: 999px;
-      font-weight: 700;
-      font-size: .85rem;
-    }
-
-    .available {
-      background: var(--bh-forest-pale);
-      color: var(--bh-forest);
-    }
-
-    .loaned {
-      background: #fff3da;
-      color: #8a5a00;
-    }
-
-    .reserved {
-      background: #f2ebff;
-      color: #5d3bb0;
-    }
-
-    @media (max-width: 960px) {
-      .catalogue-page {
-        padding: 1rem;
-      }
-
-      .catalogue-topbar,
-      .hero,
-      .results-head {
-        display: grid;
-      }
-
-      .filters {
-        grid-template-columns: 1fr;
-      }
-
-      .book-card {
-        grid-template-columns: 1fr;
-      }
-
-      .cover {
-        width: 4.5rem;
-        height: 6.5rem;
-      }
-
-      .hero-stats {
-        grid-template-columns: 1fr 1fr 1fr;
-      }
-    }
-
-    @media (max-width: 640px) {
-      .hero {
-        padding: 1rem;
-      }
-
-      .hero-stats {
-        grid-template-columns: 1fr;
-      }
-
-      .results-head button {
-        justify-self: start;
-      }
-    }
-  `],
+  templateUrl: './catalogue.component.html',
+  styleUrl: './catalogue.component.scss',
 })
 export class CatalogueComponent implements OnInit {
-  private readonly reservationService = inject(ReservationService);
-  private readonly dialog = inject(MatDialog);
-  private readonly bookService = inject(BookService);
-  private readonly cdr = inject(ChangeDetectorRef);
 
-  query = '';
-  category = 'all';
+  private readonly bookService         = inject(BookService);
+  private readonly reservationsService = inject(ReservationsService);
+  private readonly loansService        = inject(LoansService);
+  private readonly authService         = inject(AuthService);
+  private readonly snackBar            = inject(MatSnackBar);
+  private readonly router              = inject(Router);
+
+  // ── État ────────────────────────────────────────────────────────────────
+  readonly books     = signal<Book[]>([]);
+  readonly loading   = signal(true);
+  readonly reserving = signal<number | null>(null);
+  readonly loaning   = signal<number | null>(null);
+
+  /** Vrai si l'utilisateur a une session valide */
+  isConnected = false;
+
+  /** IDs des livres déjà réservés par l'utilisateur connecté */
+  reservedBookIds: Set<number> = new Set();
+
+  /** Nombre d'emprunts en cours */
+  currentLoanCount = 0;
+
+  get isMaxloan(): boolean {
+    return this.currentLoanCount >= 3;
+  }
+
+  // ── Filtres ─────────────────────────────────────────────────────────────
+  query        = '';
+  category     = 'all';
   availability = 'all';
-  sortBy = 'featured';
+  sortBy       = 'featured';
 
-  readonly categories = ['Fantasy', 'Science-fiction', 'Classique', 'Dystopie', 'Informatique', 'Jeunesse'];
+  // ── Stats calculées ─────────────────────────────────────────────────────
+  readonly totalBooks       = () => this.books().length;
+  readonly availableBooks   = () => this.books().filter(b => (b.availableCopies ?? 0) > 0).length;
+  readonly unavailableBooks = () => this.books().filter(b => (b.availableCopies ?? 0) === 0).length;
+  readonly categories       = () =>
+    [...new Set(this.books().map(b => b.category).filter(Boolean))] as string[];
 
-  books: BookCard[] = [];
-
-  get availableCount(): number {
-    return this.books.filter((book) => book.status === 'available').length;
-  }
-
-  get unavailableCount(): number {
-    return this.books.filter((book) => book.status === 'loaned').length;
-  }
-
+  // ── Init ────────────────────────────────────────────────────────────────
   ngOnInit(): void {
-    this.loadBooks();
+    this.isConnected = this.authService.hasValidSession();
+    this.loadAll();
   }
 
-  // Charge les livres depuis le backend selon les filtres sélectionnés
-  loadBooks(): void {
-    this.bookService.searchBooks({
-      query: this.query.trim() || undefined,
-      category: this.category !== 'all' ? this.category : undefined,
-      available: this.mapAvailability(),
-      sort: this.mapSort(),
-    }).subscribe({
-      next: (response: Book[] | { content?: Book[] }) => {
-        const books = Array.isArray(response) ? response : response.content ?? [];
-
-        this.books = books.map((book) => this.toBookCard(book));
-
-        // Force Angular à rafraîchir l'affichage après la réponse HTTP
-        this.cdr.detectChanges();
-      },
-      error: (error) => {
-        console.error('Erreur lors du chargement des livres', error);
-      },
-    });
-  }
-
-  // Convertit un BookDTO backend en format utilisé par la carte du catalogue
-  private toBookCard(book: Book): BookCard {
-    const availableCopies = book.availableCopies ?? 0;
-
-    return {
-      id: book.id,
-      title: book.title,
-      author: book.author,
-      category: book.category ?? 'Non catégorisé',
-      rating: Number(book.averageRating ?? 0),
-      status: availableCopies > 0 ? 'available' : 'loaned',
-      summary: book.description ?? 'Description non disponible',
-      nextAvailable: availableCopies > 0 ? undefined : 'Date à confirmer',
-      queue: availableCopies > 0 ? undefined : 'Réservation possible',
-    };
-  }
-
-  // Transforme le filtre d'affichage en booléen attendu par le backend
-  private mapAvailability(): boolean | undefined {
-    if (this.availability === 'available') {
-      return true;
-    }
-
-    if (this.availability === 'loaned') {
-      return false;
-    }
-
-    return undefined;
-  }
-
-  // Transforme le tri sélectionné en valeur comprise par le backend
-  private mapSort(): string | undefined {
-    switch (this.sortBy) {
-      case 'title_desc':
-        return 'title_desc';
-      case 'rating_desc':
-        return 'rating_desc';
-      case 'rating_asc':
-        return 'rating_asc';
-      case 'date_desc':
-        return 'date_desc';
-      case 'date_asc':
-        return 'date_asc';
-      default:
-        return undefined;
-    }
-  }
-
-  openReservation(book: BookCard): void {
-    const suggested = this.reservationService.getSuggestedReservationDates(book);
-    const preview = this.reservationService.buildPreview(book, suggested.startDate, suggested.endDate);
-
-    const dialogRef = this.dialog.open(ReservationDialogComponent, {
-      data: { book, preview },
-    });
-
-    dialogRef.afterClosed().subscribe((formValue) => {
-      if (!formValue) {
-        return;
-      }
-
-      const reservation = this.reservationService.createReservation({
-        bookTitle: book.title,
-        bookAuthor: book.author,
-        category: book.category,
-        requestedStartDate: formValue.startDate,
-        requestedEndDate: formValue.endDate,
+  private loadAll(): void {
+    if (this.isConnected) {
+      // Connecté : charge livres + réservations + quota en parallèle
+      forkJoin({
+        books:        this.bookService.getBooks(),
+        reservations: this.reservationsService.getMyReservations(),
+        loanCount:    this.loansService.getLoanCount(),
+      }).subscribe({
+        next: ({ books, reservations, loanCount }) => {
+          this.books.set(books);
+          this.currentLoanCount = loanCount;
+          this.reservedBookIds = new Set(
+            reservations
+              .filter(r => r.status === 'PENDING' || r.status === 'AVAILABLE')
+              .map(r => r.bookId)
+          );
+          this.loading.set(false);
+        },
+        error: () => this.loading.set(false),
       });
+    } else {
+      // Non connecté : uniquement les livres (endpoint public)
+      this.bookService.getBooks().subscribe({
+        next: (list) => { this.books.set(list); this.loading.set(false); },
+        error: ()    => this.loading.set(false),
+      });
+    }
+  }
 
-      this.dialog.open(ReservationSuccessDialogComponent, { data: reservation });
+  // ── Filtres / tri ────────────────────────────────────────────────────────
+  readonly filteredBooks = (): Book[] => {
+    const q = this.query.trim().toLowerCase();
+    let list = this.books().filter(book => {
+      const matchQ = !q || [book.title, book.author, book.isbn ?? '']
+        .some(v => v.toLowerCase().includes(q));
+      const matchCat   = this.category === 'all' || book.category === this.category;
+      const copies     = book.availableCopies ?? 0;
+      const matchAvail =
+        this.availability === 'all' ||
+        (this.availability === 'available'   && copies > 0) ||
+        (this.availability === 'unavailable' && copies === 0);
+      return matchQ && matchCat && matchAvail;
     });
+
+    if (this.sortBy === 'title')  list = [...list].sort((a, b) => a.title.localeCompare(b.title));
+    if (this.sortBy === 'rating') list = [...list].sort((a, b) =>
+      (b.averageRating ?? 0) - (a.averageRating ?? 0));
+    return list;
+  };
+
+  isAvailable(book: Book): boolean {
+    return (book.availableCopies ?? 0) > 0;
+  }
+
+  isAlreadyReserved(book: Book): boolean {
+    return book.id !== undefined && this.reservedBookIds.has(book.id);
   }
 
   resetFilters(): void {
@@ -568,17 +151,66 @@ export class CatalogueComponent implements OnInit {
     this.category = 'all';
     this.availability = 'all';
     this.sortBy = 'featured';
-    this.loadBooks();
   }
 
-  statusLabel(status: ReservationBookStatus): string {
-    switch (status) {
-      case 'available':
-        return 'Disponible';
-      case 'loaned':
-        return 'Indisponible';
-      case 'reserved':
-        return 'Réservé';
-    }
+  // ── Actions ──────────────────────────────────────────────────────────────
+
+  private requireAuth(): boolean {
+    if (this.authService.hasValidSession()) return true;
+    this.snackBar.open(
+      'Vous devez être connecté pour effectuer cette action.',
+      'Se connecter',
+      { duration: 5000, panelClass: ['snack-warn'] }
+    ).onAction().subscribe(() => this.router.navigate(['/login']));
+    return false;
+  }
+
+  /** US-RESA-01 : réserver un livre indisponible — direct, sans overlay */
+  reserve(book: Book): void {
+    if (!this.requireAuth()) return;
+    if (!book.id) return;
+
+    this.reserving.set(book.id);
+    this.reservationsService.createReservation(book.id).subscribe({
+      next: (res: ReservationItem) => {
+        this.reserving.set(null);
+        this.reservedBookIds = new Set([...this.reservedBookIds, book.id!]);
+        this.snackBar.open(
+          `Réservation confirmée ! Vous êtes n°${res.rank} dans la file d'attente.`,
+          'Fermer',
+          { duration: 5000, panelClass: ['snack-success'] }
+        );
+      },
+      error: (err) => {
+        this.reserving.set(null);
+        const msg = err?.error?.detail ?? 'Impossible de réserver ce livre. Réessayez.';
+        this.snackBar.open(msg, 'Fermer', { duration: 5000, panelClass: ['snack-error'] });
+      },
+    });
+  }
+
+  /** Emprunter un livre disponible */
+  createLoan(book: Book): void {
+    if (!this.requireAuth()) return;
+    if (!book.id) return;
+
+    this.loaning.set(book.id);
+    this.loansService.createLoan(book.id).subscribe({
+      next: () => {
+        this.loaning.set(null);
+        this.currentLoanCount = Math.min(this.currentLoanCount + 1, 3);
+        this.loadAll();
+        this.snackBar.open(
+          `"${book.title}" a bien été emprunté !`,
+          'Fermer',
+          { duration: 5000, panelClass: ['snack-success'] }
+        );
+      },
+      error: (err) => {
+        this.loaning.set(null);
+        const msg = err?.error?.detail ?? 'Impossible d\'emprunter ce livre. Réessayez.';
+        this.snackBar.open(msg, 'Fermer', { duration: 5000, panelClass: ['snack-error'] });
+      },
+    });
   }
 }

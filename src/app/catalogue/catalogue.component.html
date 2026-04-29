@@ -1,6 +1,6 @@
 <section class="catalogue-page">
 
-    <!-- En-tête -->
+    <!-- En-tête hero -->
     <header class="hero">
         <div>
             <p class="eyebrow">Catalogue BookHub</p>
@@ -14,18 +14,19 @@
         </div>
     </header>
 
+    <!-- Bannière quota (uniquement si connecté) -->
+    @if (isConnected) {
     <div class="loan-info-banner" [class.max-reached]="isMaxloan">
         <mat-icon>{{ isMaxloan ? 'warning' : 'info' }}</mat-icon>
-
         @if (isMaxloan) {
         <span>Vous avez atteint votre quota maximum (<strong>{{currentLoanCount}}</strong>/3 prêts). Veuillez rendre un
             livre pour en emprunter de nouveaux.</span>
         } @else {
-        <span>Vous avez actuellement <strong>{{currentLoanCount}}</strong> prêt(s) en cours. Il vous reste <strong>{{ 3
-                - currentLoanCount }}</strong> emplacement(s) libre(s).</span>
+        <span>Vous avez actuellement <strong>{{currentLoanCount}}</strong> prêt(s) en cours. Il vous reste
+            <strong>{{ 3 - currentLoanCount }}</strong> emplacement(s) libre(s).</span>
         }
     </div>
-
+    }
 
     <!-- Filtres -->
     <section class="filters" aria-label="Filtres du catalogue">
@@ -95,8 +96,8 @@
                         <h3>{{ book.title }}</h3>
                         <p>{{ book.author }}</p>
                     </div>
-                    @if (book.averageRating > 0) {
-                    <span class="rating"><mat-icon>star</mat-icon>{{ book.averageRating.toFixed(1) }}</span>
+                    @if ((book.averageRating ?? 0) > 0) {
+                    <span class="rating"><mat-icon>star</mat-icon>{{ (book.averageRating ?? 0).toFixed(1) }}</span>
                     }
                 </div>
                 @if (book.category) { <span class="chip-cat">{{ book.category }}</span> }
@@ -113,23 +114,31 @@
 
                 <div class="actions">
                     @if (isAvailable(book)) {
-                    <!-- Emprunt : implémenté dans LoanController -->
                     <span [matTooltip]="isMaxloan ? 'Vous avez atteint la limite de 3 emprunts' : ''">
-                        <button mat-raised-button color="primary" [disabled]="isMaxloan" (click)="createLoan(book)">
+                        <button mat-raised-button color="primary"
+                                [disabled]="isMaxloan || loaning() === book.id"
+                                (click)="createLoan(book)">
+                            @if (loaning() === book.id) {
+                                <mat-spinner diameter="18" />
+                            } @else {
+                                <mat-icon>menu_book</mat-icon>
+                            }
                             {{ isMaxloan ? 'Limite atteinte' : 'Emprunter' }}
                         </button>
                     </span>
                     } @else if (isAlreadyReserved(book)) {
-                    <!-- Livre déjà réservé par l'utilisateur connecté -->
-                    <div class="already-reserved-badge" matTooltip="Vous avez déjà une réservation active pour ce livre"
-                        matTooltipPosition="above" role="status" aria-label="Vous avez déjà réservé ce livre">
+                    <div class="already-reserved-badge"
+                        matTooltip="Vous avez déjà une réservation active pour ce livre"
+                        matTooltipPosition="above"
+                        role="status">
                         <mat-icon>bookmark</mat-icon>
                         Déjà réservé
                     </div>
                     } @else {
-                    <!-- Réservation (US-RESA-01) -->
-                    <button mat-flat-button color="accent" type="button" [disabled]="reserving() === book.id"
-                        (click)="reserve(book)" aria-label="Réserver {{ book.title }}">
+                    <button mat-flat-button color="accent" type="button"
+                        [disabled]="reserving() === book.id"
+                        (click)="reserve(book)"
+                        aria-label="Réserver {{ book.title }}">
                         @if (reserving() === book.id) {
                         <mat-spinner diameter="18" />
                         } @else {

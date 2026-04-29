@@ -25,7 +25,7 @@ interface ShellNavItem {
   ],
   template: `
     <mat-sidenav-container class="shell">
-      <mat-sidenav class="sidenav" [mode]="isMobile ? 'over' : 'side'" [opened]="drawerOpened">
+      <mat-sidenav class="sidenav" [mode]="isMobile ? 'over' : 'side'" [opened]="isConnected && drawerOpened">
 
         <!-- Brand -->
         <div class="brand-block">
@@ -78,6 +78,7 @@ interface ShellNavItem {
       </mat-sidenav>
 
       <mat-sidenav-content class="content-shell">
+        @if (isConnected) {
         <mat-toolbar class="topbar">
           <button mat-icon-button type="button" class="menu-button" (click)="toggleDrawer()" aria-label="Menu">
             <mat-icon>menu</mat-icon>
@@ -115,6 +116,7 @@ interface ShellNavItem {
             <span>Déconnexion</span>
           </button>
         </mat-toolbar>
+        }
 
         <main class="main-content">
           <router-outlet />
@@ -250,13 +252,17 @@ export class AppShellComponent implements OnInit {
   protected isMobile     = typeof window !== 'undefined' ? window.innerWidth < 960 : false;
   protected drawerOpened = !this.isMobile;
 
+  /** Vrai si l'utilisateur a une session valide — pilote l'affichage sidebar + topbar */
+  protected isConnected = false;
+
   ngOnInit(): void {
-    // 👉 Si pas connecté → on laisse passer (catalogue public)
-    if (!this.authService.hasValidSession()) {
+    this.isConnected = this.authService.hasValidSession();
+
+    if (!this.isConnected) {
+      this.drawerOpened = false;
       return;
     }
 
-    // 👉 Sinon on charge le profil
     this.profileService.getProfile().subscribe({
       next: () => {},
       error: () => {

@@ -9,13 +9,13 @@ export const routes: Routes = [
     loadComponent: () => import('./home/home.component').then((m) => m.HomeComponent),
   },
   {
-    path: 'catalogue',
-    loadComponent: () => import('./catalogue/catalogue.component').then((m) => m.CatalogueComponent),
-  },
-  {
     path: '',
     loadComponent: () => import('./layout/app-shell/app-shell.component').then((m) => m.AppShellComponent),
     children: [
+      {
+        path: 'catalogue',
+        loadComponent: () => import('./catalogue/catalogue.component').then((m) => m.CatalogueComponent),
+      },
       {
         path: 'dashboard',
         canActivate: [authGuard],
