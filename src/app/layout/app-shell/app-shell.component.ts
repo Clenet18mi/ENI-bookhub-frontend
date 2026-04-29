@@ -251,6 +251,12 @@ export class AppShellComponent implements OnInit {
   protected drawerOpened = !this.isMobile;
 
   ngOnInit(): void {
+    // 👉 Si pas connecté → on laisse passer (catalogue public)
+    if (!this.authService.hasValidSession()) {
+      return;
+    }
+
+    // 👉 Sinon on charge le profil
     this.profileService.getProfile().subscribe({
       next: () => {},
       error: () => {

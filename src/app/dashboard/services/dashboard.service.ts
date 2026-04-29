@@ -1,55 +1,42 @@
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { LoanResponse } from '../../loans/models/loan-response.model';
 import { HttpClient } from '@angular/common/http';
+import { LoanResponse } from '../../loans/models/loan-response.model';
 
-export type DashboardStat = {
-  label: string;
-  value: string;
-  hint: string;
-  icon: string;
-  tone: 'forest' | 'amber' | 'warn';
-};
-
-export type DashboardLoan = {
-  title: string;
-  author: string;
-  due: string;
-  status: string;
-  statusTone: 'late' | 'normal';
-};
-
-export type DashboardReservation = {
-  title: string;
-  author: string;
-  availability: string;
-  chips: string[];
-};
+/**
+ * Réservation du lecteur connecté — shape retournée par GET /api/reservations/my.
+ * Miroir du ReservationResponse.java du backend.
+ */
+export interface UserReservation {
+  id: number;
+  bookId: number;
+  bookTitle: string;
+  bookAuthor: string;
+  bookCategory: string;
+  bookCoverUrl: string | null;
+  rank: number;
+  /** WAITING | AVAILABLE | BORROWED | CANCELED */
+  status: 'WAITING' | 'AVAILABLE' | 'BORROWED' | 'CANCELED';
+  reservationDate: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class DashboardService {
+  private readonly http = inject(HttpClient);
 
-
-  getStats(): DashboardStat[] {
-    return [
-      { label: 'Emprunts en cours', value: '3', hint: 'livres empruntés', icon: 'menu_book', tone: 'forest' },
-      { label: 'Réservations', value: '1', hint: 'livre réservé', icon: 'bookmark', tone: 'amber' },
-      { label: 'Alertes', value: '1', hint: 'retard en cours', icon: 'warning_amber', tone: 'warn' },
-    ];
+  /**
+   * GET /api/loans/my
+   * Tous les emprunts (actifs, retardés, retournés) du lecteur connecté.
+   */
+  getMyLoans(): Observable<LoanResponse[]> {
+    return this.http.get<LoanResponse[]>('loans/my');
   }
 
-  getRecentLoans(): DashboardLoan[] {
-    return [
-      { title: 'Le Chant des forêts', author: 'M. Durand', due: '20/04/2026', status: 'RETARD', statusTone: 'late' },
-      { title: 'Les Horizons partagés', author: 'A. Bernard', due: '30/04/2026', status: 'En cours', statusTone: 'normal' },
-      { title: 'Carnet de lecture', author: 'L. Martin', due: '30/04/2026', status: 'En cours', statusTone: 'normal' },
-    ];
-  }
-
-  getReservations(): DashboardReservation[] {
-    return [
-      { title: 'La Ville invisible', author: 'S. Cohen', availability: 'Disponible sous 3 jours', chips: ['Position 1', 'Réservation active'] },
-      { title: 'Atlas des histoires', author: 'J. Lefevre', availability: 'Disponible sous 6 jours', chips: ['Position 2', 'En attente'] },
-    ];
+  /**
+   * GET /api/reservations/my
+   * Toutes les réservations du lecteur connecté.
+   */
+  getMyReservations(): Observable<UserReservation[]> {
+    return this.http.get<UserReservation[]>('reservations/my');
   }
 }
