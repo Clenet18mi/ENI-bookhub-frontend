@@ -88,7 +88,7 @@ export class DashboardComponent implements OnInit {
       (l) => l.status === 'ACTIVE' || l.status === 'OVERDUE'
     ).length;
     const activeReservations = reservations.filter(
-      (r) => r.status === 'WAITING' || r.status === 'AVAILABLE'
+      (r) => r.status === 'PENDING' || r.status === 'AVAILABLE'
     ).length;
     const overdue = loans.filter((l) => l.status === 'OVERDUE').length;
 
@@ -130,10 +130,10 @@ export class DashboardComponent implements OnInit {
       .slice(0, 5)
   );
 
-  /** Réservations actives (WAITING ou AVAILABLE) triées par rang. */
+  /** Réservations actives (PENDING ou AVAILABLE) triées par rang. */
   readonly activeReservations = computed(() =>
     this.myReservations()
-      .filter((r) => r.status === 'WAITING' || r.status === 'AVAILABLE')
+      .filter((r) => r.status === 'PENDING' || r.status === 'AVAILABLE')
       .sort((a, b) => a.rank - b.rank)
   );
 
@@ -319,14 +319,14 @@ export class DashboardComponent implements OnInit {
 
   reservationStatusLabel(status: UserReservation['status']): string {
     return (
-      { WAITING: 'En attente', AVAILABLE: 'Disponible !', BORROWED: 'Emprunté', CANCELED: 'Annulé' }[status] ?? status
+      { PENDING: 'En attente', AVAILABLE: 'Disponible !', BORROWED: 'Emprunté', CANCELLED: 'Annulé' }[status] ?? status
     );
   }
 
   reservationChips(r: UserReservation): string[] {
     const chips = [`Position ${r.rank}`];
     if (r.status === 'AVAILABLE') chips.push('Disponible maintenant');
-    else if (r.status === 'WAITING') chips.push('En attente');
+    else if (r.status === 'PENDING') chips.push('En attente');
     return chips;
   }
 }

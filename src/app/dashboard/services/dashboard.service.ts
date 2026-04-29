@@ -3,10 +3,6 @@ import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { LoanResponse } from '../../loans/models/loan-response.model';
 
-/**
- * Réservation du lecteur connecté — shape retournée par GET /api/reservations/my.
- * Miroir du ReservationResponse.java du backend.
- */
 export interface UserReservation {
   id: number;
   bookId: number;
@@ -15,8 +11,8 @@ export interface UserReservation {
   bookCategory: string;
   bookCoverUrl: string | null;
   rank: number;
-  /** WAITING | AVAILABLE | BORROWED | CANCELED */
-  status: 'WAITING' | 'AVAILABLE' | 'BORROWED' | 'CANCELED';
+  /** PENDING | AVAILABLE | BORROWED | CANCELLED */
+  status: 'PENDING' | 'AVAILABLE' | 'BORROWED' | 'CANCELLED';
   reservationDate: string;
 }
 
