@@ -254,52 +254,54 @@ h1 {
         }
     }
 }
+/* ── Mini-header visiteur (non connecté) ─────────────────────────── */
+.catalogue-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    background: rgba(255,255,255,.92);
+    border-radius: 1.25rem;
+    border: 1px solid rgba(26,26,26,.07);
+    backdrop-filter: blur(10px);
+}
 
-.add-book-field {
+.brand-link {
+    display: flex;
+    align-items: center;
+    gap: .9rem;
+    text-decoration: none;
+    color: inherit;
+}
 
-    // On cible le wrapper principal dont tu parles
-    ::ng-deep .mat-mdc-text-field-wrapper {
-        background-color: #2e7d32 !important; // Ton vert
-        border-radius: 4px !important; // Pour correspondre à l'arrondi de l'outline
-        padding: 0 !important;
-        cursor: pointer;
-    }
+.brand-mark {
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: .875rem;
+    background: var(--bh-forest, #1f4d3a);
+    color: #fff;
+    display: grid;
+    place-items: center;
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 1.25rem;
+}
 
-    // On harmonise les bordures de l'outline pour qu'elles soient invisibles ou vertes
-    ::ng-deep .mdc-notched-outline__leading,
-    ::ng-deep .mdc-notched-outline__notch,
-    ::ng-deep .mdc-notched-outline__trailing {
-        border-color: #2e7d32 !important;
-    }
+.brand-name {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 1.5rem;
+    line-height: 1;
+}
 
-    // On stylise le bouton à l'intérieur pour qu'il soit invisible (le vert vient du wrapper derrière)
-    .green-button {
-        background: transparent !important;
-        color: white !important;
-        width: 100%;
-        height: 100%;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
+.brand-name span { color: var(--bh-amber, #e6820a); }
 
-        mat-icon {
-            margin: 0;
-            color: white;
-        }
-    }
+.brand-tag {
+    font-size: .8rem;
+    color: var(--bh-ink-light, #888);
+}
 
-    // Pour supprimer l'espace sous le champ (le "subscript") qui le rendait "trop grand"
-    ::ng-deep .mat-mdc-form-field-subscript-wrapper {
-        display: none !important;
-    }
-
-    // Ajustement de la hauteur pour qu'il soit identique aux mat-select (56px par défaut)
-    ::ng-deep .mat-mdc-form-field-infix {
-        padding: 0 !important;
-        min-height: 56px !important;
-        display: flex;
-        align-items: center;
-    }
+.topbar-actions {
+    display: flex;
+    gap: .5rem;
+    align-items: center;
 }

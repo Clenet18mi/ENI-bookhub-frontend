@@ -21,7 +21,6 @@ export class BookService {
     return this.http.get<Book[]>('books');
   }
 
-<<<<<<< Updated upstream
   // Appelle l'endpoint GET /api/books/search avec les filtres sélectionnés
   searchBooks(filters: BookSearchParams): Observable<Book[]> {
     let params = new HttpParams();
@@ -49,14 +48,12 @@ export class BookService {
     return this.http.get<Book[]>('books/search', { params });
   }
 
-=======
 
   getBookById(id: number): Observable<BookDetail> {
     return this.http.get<BookDetail>(`books/${id}`);
   }
 
 
->>>>>>> Stashed changes
   addBook(book: Book): Observable<Book> {
     return this.http.post<Book>('books', book);
   }
