@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Book } from '../models/book.model';
+import { Book, BookDetail } from '../models/book.model';
 
 // Paramètres possibles pour rechercher/filtrer/trier les livres
 export interface BookSearchParams {
@@ -21,6 +21,7 @@ export class BookService {
     return this.http.get<Book[]>('books');
   }
 
+<<<<<<< Updated upstream
   // Appelle l'endpoint GET /api/books/search avec les filtres sélectionnés
   searchBooks(filters: BookSearchParams): Observable<Book[]> {
     let params = new HttpParams();
@@ -48,9 +49,18 @@ export class BookService {
     return this.http.get<Book[]>('books/search', { params });
   }
 
+=======
+
+  getBookById(id: number): Observable<BookDetail> {
+    return this.http.get<BookDetail>(`books/${id}`);
+  }
+
+
+>>>>>>> Stashed changes
   addBook(book: Book): Observable<Book> {
     return this.http.post<Book>('books', book);
   }
+
 
   deleteBook(id: number): Observable<void> {
     return this.http.delete<void>(`books/${id}`);

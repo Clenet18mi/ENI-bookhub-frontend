@@ -1,0 +1,57 @@
+<div class="admin-root" *ngIf="book">
+  <div class="users-section">
+    <div class="detail-header">
+      <div class="header-badge"><mat-icon>book</mat-icon></div>
+      <div class="detail-title">
+        <h1>{{ book.title }}</h1>
+        <p class="author">Par {{ book.author }}</p>
+      </div>
+      <div class="status-badge" [ngClass]="(book.availableCopies ?? 0) > 0 ? 'active' : 'inactive'">
+        <mat-icon>{{ (book.availableCopies ?? 0) > 0 ? 'check_circle' : 'error' }}</mat-icon>
+        {{ (book.availableCopies ?? 0) > 0 ? 'En stock' : 'Indisponible' }}
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="info-grid">
+        <div class="info-item"><span class="info-label">ISBN</span><span class="info-value mono">{{ book.isbn }}</span></div>
+        <div class="info-item"><span class="info-label">Catégorie</span><span class="info-value">{{ book.category }}</span></div>
+        <div class="info-item">
+          <span class="info-label">Note</span>
+          <span class="info-value">★ {{ book.averageRating }}</span> <!-- CORRIGÉ ICI -->
+        </div>
+        <div class="info-item"><span class="info-label">Stock</span><span class="info-value">{{ book.availableCopies }} / {{ book.totalCopies }}</span></div>
+      </div>
+      <div class="description-box">
+        <h3 class="section-title"><mat-icon>description</mat-icon> Résumé</h3>
+        <p>{{ book.description }}</p>
+      </div>
+
+      <div style="margin-top: 20px;">
+        <button (click)="onDelete()" style="color: red; cursor: pointer; background: none; border: 1px solid red; padding: 5px 10px; border-radius: 5px;">
+          Supprimer le livre
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="detail-pane">
+    <div class="detail-header"><h2 class="section-title"><mat-icon>reviews</mat-icon> Avis lecteurs</h2></div>
+    <div class="tab-content">
+      <div class="loan-list">
+        <!-- CORRIGÉ ICI : book.reviews au lieu de reviews -->
+        <div *ngFor="let review of book.reviews" class="loan-card">
+          <div class="loan-status-bar"></div>
+          <div class="loan-info">
+            <span class="loan-title">{{ review.userName }}</span>
+            <span class="loan-author">Note : {{ review.rating }}/5</span>
+            <p class="user-email">{{ review.comment }}</p>
+          </div>
+        </div>
+        <div *ngIf="book.reviews?.length === 0" style="padding: 20px; text-align: center; color: gray;">
+          Aucun avis pour le moment.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
