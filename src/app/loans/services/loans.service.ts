@@ -27,6 +27,14 @@ export class LoansService {
     return this.http.put<void>(`loans/${loanId}/return`, {});
   }
 
+  /**
+   * PUT /api/loans/{id}/approve
+   * Valide un emprunt en statut PENDING → ACTIVE (réservé au LIBRARIAN).
+   */
+  approveLoan(loanId: number): Observable<void> {
+    return this.http.put<void>(`loans/${loanId}/approve`, {});
+  }
+
   createLoan(bookId: number): Observable<LoanResponse> {
     return this.http.post<LoanResponse>(`loans/create`, { bookId })
   }

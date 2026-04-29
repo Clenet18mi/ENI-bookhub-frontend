@@ -21,6 +21,7 @@ import { ProfileService } from '../profile/profile.service';
 import { LoanResponse } from '../loans/models/loan-response.model';
 import { MatTableModule } from '@angular/material/table';
 import { ReturnConfirmationDialogComponent } from '../common/components/return-confirmation-dialog/return-confirmation-dialog';
+import { ValidateConfirmationDialogComponent } from '../common/components/validate-confirmation-dialog/validate-confirmation-dialog';
 import { LoansService } from '../loans/services/loans.service';
 import { MatDialog } from '@angular/material/dialog';
 
@@ -268,6 +269,10 @@ export class DashboardComponent implements OnInit {
   // Helpers vue Bibliothécaire
   // ─────────────────────────────────────────────────────────────────────────────
 
+  /**
+   * Ouvre la dialog de confirmation de retour, puis appelle returnLoan().
+   * Utilisé pour les emprunts dont le statut n'est pas PENDING (ACTIVE, OVERDUE…).
+   */
   markAsReturned(loan: LoanResponse) {
     const dialogRef = this.dialog.open(ReturnConfirmationDialogComponent, {
       data: {
@@ -282,6 +287,29 @@ export class DashboardComponent implements OnInit {
         this.loanService.returnLoan(loan.id).subscribe({
           next: () => this.loadAllLoans(),
           error: (err) => console.error('Erreur retour', err),
+        });
+      }
+    });
+  }
+
+  /**
+   * Ouvre la dialog de confirmation de validation, puis appelle approveLoan().
+   * Utilisé pour les emprunts dont le statut est PENDING → passage à ACTIVE.
+   */
+  validateLoan(loan: LoanResponse) {
+    const dialogRef = this.dialog.open(ValidateConfirmationDialogComponent, {
+      data: {
+        loanId: loan.id,
+        bookTitle: loan.bookTitle,
+        userFullName: loan.userFullName,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result === true) {
+        this.loanService.approveLoan(loan.id).subscribe({
+          next: () => this.loadAllLoans(),
+          error: (err) => console.error('Erreur validation emprunt', err),
         });
       }
     });
@@ -314,7 +342,9 @@ export class DashboardComponent implements OnInit {
   }
 
   loanStatusLabel(status: string): string {
-    return { ACTIVE: 'En cours', OVERDUE: 'RETARD', PENDING: 'En attente' }[status] ?? status;
+    return (
+      { ACTIVE: 'En cours', OVERDUE: 'RETARD', PENDING: 'En attente', RETURNED: 'Retourné' }[status] ?? status
+    );
   }
 
   reservationStatusLabel(status: UserReservation['status']): string {

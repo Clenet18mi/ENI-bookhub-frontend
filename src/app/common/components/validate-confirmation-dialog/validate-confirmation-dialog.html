@@ -1,0 +1,23 @@
+<h2 mat-dialog-title>
+  <mat-icon style="vertical-align: middle; margin-right: 8px; color: #1f4d3a;">check_circle</mat-icon>
+  Valider l'emprunt
+</h2>
+
+<mat-dialog-content>
+  <p>
+    Confirmer la validation de l'emprunt du livre
+    <strong>« {{ data.bookTitle }} »</strong>
+    pour <strong>{{ data.userFullName }}</strong> ?
+  </p>
+  <p style="color: #555; font-size: 0.875rem; margin-top: 8px;">
+    Le statut passera de <em>En attente</em> à <em>Actif</em>.
+  </p>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button [mat-dialog-close]="false">Annuler</button>
+  <button mat-flat-button color="primary" [mat-dialog-close]="true">
+    <mat-icon>check_circle</mat-icon>
+    Valider l'emprunt
+  </button>
+</mat-dialog-actions>
