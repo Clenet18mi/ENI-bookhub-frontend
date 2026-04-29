@@ -15,7 +15,7 @@
     </header>
 
     <!-- Bannière quota (uniquement si connecté) -->
-    @if (isConnected) {
+    @if (isConnected && isUser()) {
     <div class="loan-info-banner" [class.max-reached]="isMaxloan">
         <mat-icon>{{ isMaxloan ? 'warning' : 'info' }}</mat-icon>
         @if (isMaxloan) {
@@ -61,13 +61,10 @@
             </mat-select>
         </mat-form-field>
         @if (isLibrarian()) {
-        <mat-form-field appearance="outline" class="add-book-field">
-            <button mat-button class="fake-input-button" class="green-button" (click)="addBook()">
-                <mat-icon>add</mat-icon>
-                Ajouter un livre
-            </button>
-            <input matInput style="display: none;">
-        </mat-form-field>
+        <button mat-flat-button color="primary" class="add-book-btn" (click)="addBook()">
+            <mat-icon>add</mat-icon>
+            Ajouter un livre
+        </button>
         }
     </section>
 
@@ -125,30 +122,25 @@
                 <div class="actions">
                     @if (isAvailable(book)) {
                     <span [matTooltip]="isMaxloan ? 'Vous avez atteint la limite de 3 emprunts' : ''">
-                        <button mat-raised-button color="primary"
-                                [disabled]="isMaxloan || loaning() === book.id"
-                                (click)="createLoan(book)">
+                        <button mat-raised-button color="primary" [disabled]="isMaxloan || loaning() === book.id"
+                            (click)="createLoan(book)">
                             @if (loaning() === book.id) {
-                                <mat-spinner diameter="18" />
+                            <mat-spinner diameter="18" />
                             } @else {
-                                <mat-icon>menu_book</mat-icon>
+                            <mat-icon>menu_book</mat-icon>
                             }
                             {{ isMaxloan ? 'Limite atteinte' : 'Emprunter' }}
                         </button>
                     </span>
                     } @else if (isAlreadyReserved(book)) {
-                    <div class="already-reserved-badge"
-                        matTooltip="Vous avez déjà une réservation active pour ce livre"
-                        matTooltipPosition="above"
-                        role="status">
+                    <div class="already-reserved-badge" matTooltip="Vous avez déjà une réservation active pour ce livre"
+                        matTooltipPosition="above" role="status">
                         <mat-icon>bookmark</mat-icon>
                         Déjà réservé
                     </div>
                     } @else {
-                    <button mat-flat-button color="accent" type="button"
-                        [disabled]="reserving() === book.id"
-                        (click)="reserve(book)"
-                        aria-label="Réserver {{ book.title }}">
+                    <button mat-flat-button color="accent" type="button" [disabled]="reserving() === book.id"
+                        (click)="reserve(book)" aria-label="Réserver {{ book.title }}">
                         @if (reserving() === book.id) {
                         <mat-spinner diameter="18" />
                         } @else {
