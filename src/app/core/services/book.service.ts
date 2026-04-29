@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Book, BookDetail } from '../models/book.model';
+import { BookDTO } from '../../books/book.service';
 
 // Paramètres possibles pour rechercher/filtrer/trier les livres
 export interface BookSearchParams {
@@ -61,5 +62,10 @@ export class BookService {
 
   deleteBook(id: number): Observable<void> {
     return this.http.delete<void>(`books/${id}`);
+  }
+
+
+  createBook(bookData: BookDTO): Observable<BookDTO> {
+    return this.http.post<BookDTO>(`books/create`, bookData);
   }
 }

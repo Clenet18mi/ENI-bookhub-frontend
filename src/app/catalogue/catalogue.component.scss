@@ -254,6 +254,7 @@ h1 {
         }
     }
 }
+
 /* ── Mini-header visiteur (non connecté) ─────────────────────────── */
 .catalogue-topbar {
     display: flex;
@@ -261,9 +262,9 @@ h1 {
     align-items: center;
     gap: 1rem;
     padding: 1rem 1.5rem;
-    background: rgba(255,255,255,.92);
+    background: rgba(255, 255, 255, .92);
     border-radius: 1.25rem;
-    border: 1px solid rgba(26,26,26,.07);
+    border: 1px solid rgba(26, 26, 26, .07);
     backdrop-filter: blur(10px);
 }
 
@@ -293,7 +294,9 @@ h1 {
     line-height: 1;
 }
 
-.brand-name span { color: var(--bh-amber, #e6820a); }
+.brand-name span {
+    color: var(--bh-amber, #e6820a);
+}
 
 .brand-tag {
     font-size: .8rem;
@@ -304,4 +307,33 @@ h1 {
     display: flex;
     gap: .5rem;
     align-items: center;
+}
+
+.filters {
+    display: grid;
+    grid-template-columns: 1.5fr repeat(3, minmax(0, 1fr));
+    gap: .9rem;
+    /* On change 'start' par 'stretch' pour que les éléments remplissent la hauteur */
+    align-items: stretch;
+}
+
+.add-book-btn {
+    /* 56px correspond à la hauteur exacte d'un mat-form-field outline */
+    height: 56px;
+    border-radius: 4px;
+    /* Optionnel : pour arrondir un peu plus comme tes cartes */
+    font-size: 0.95rem;
+    font-weight: 600;
+
+    /* Pour l'icône à l'intérieur */
+    mat-icon {
+        margin-right: 4px;
+    }
+}
+
+/* On s'assure qu'en mobile le bouton prend aussi la bonne taille */
+@media (max-width: 960px) {
+    .add-book-btn {
+        width: 100%;
+    }
 }
